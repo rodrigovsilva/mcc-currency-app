@@ -4,7 +4,7 @@ spring:
       prefix: /
       suffix: .jsp
   messages:
-    basename: validation
+    basename: messsages
   jpa:
     hibernate:
       ddl-auto: create
@@ -30,3 +30,11 @@ logging:
         console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
         file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
     file: logs/spring-boot-logging.log
+
+#currency api data
+currency:
+  api:
+    key: 74fb21f20944e2c3e8f10beccd88748f
+    uri:
+      live: http://apilayer.net/api/live
+      historical: http://apilayer.net/api/historical

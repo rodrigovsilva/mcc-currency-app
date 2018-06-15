@@ -33,14 +33,18 @@
                 <a class="navbar-brand" th:href="@{/}">My Currency Converter</a>
             </div>
             <div id="navbar" class="collapse navbar-collapse">
-                <ul class="nav navbar-nav">
+                <!--<ul class="nav navbar-nav">
                     <li class="active"><a th:href="@{/}">Home</a></li>
-                </ul>
+                </ul>-->
             </div>
         </div>
     </nav>
 
-    TESTE
+    <form:form commandName="conversionForm" method="POST" action="${contextPath}/convert">
+        <form:select path = "exchange" onchange="submit()">
+            <form:options items = "${availableCurrencies}" />
+        </form:select>
+    <form>
 
     <footer>
         <c:if test="${pageContext.request.userPrincipal.name != null}">
@@ -48,7 +52,7 @@
                 <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
             </form>
 
-            <span>Welcome ${pageContext.request.userPrincipal.name} | <a onclick="document.forms['logoutForm'].submit()">Logout</a></span>
+            <span>Welcome ${pageContext.request.userPrincipal.name} | <a onclick="document.forms['logoutForm'].submit()" class="cursor-pointer">Logout</a></span>
 
         </c:if>
 
