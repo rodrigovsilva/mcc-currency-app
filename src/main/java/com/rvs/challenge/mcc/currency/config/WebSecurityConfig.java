@@ -1,4 +1,4 @@
-package com.rvs.challenge.mcc.currency;
+package com.rvs.challenge.mcc.currency.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;

@@ -3,7 +3,6 @@ package com.rvs.challenge.mcc.currency.service;
 import com.rvs.challenge.mcc.currency.model.Role;
 import com.rvs.challenge.mcc.currency.model.User;
 import com.rvs.challenge.mcc.currency.repository.UserRepository;
-import com.rvs.challenge.mcc.currency.util.ObjectParserUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.invoke.MethodHandles;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -34,16 +34,20 @@ public class UserDetailsServiceImpl implements UserDetailsService{
     @Override
     @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findByUsername(username);
-        LOGGER.info(ObjectParserUtil.getInstance().toString(user));
+        Optional<User> userModel = userRepository.findByUsername(username);
 
-        Set<GrantedAuthority> grantedAuthorities = new HashSet<>();
-        if(user.getRoles() != null) {
-            for (Role role : user.getRoles()) {
-                grantedAuthorities.add(new SimpleGrantedAuthority(role.getName()));
+        if(userModel.isPresent()) {
+            User user = userModel.get();
+            Set<GrantedAuthority> grantedAuthorities = new HashSet<>();
+            if (user.getRoles() != null) {
+                for (Role role : user.getRoles()) {
+                    grantedAuthorities.add(new SimpleGrantedAuthority(role.getName()));
+                }
             }
-        }
 
-        return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(), grantedAuthorities);
+            return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(), grantedAuthorities);
+        } else {
+            throw new UsernameNotFoundException(String.format("Username[%s] not found", username));
+        }
     }
 }

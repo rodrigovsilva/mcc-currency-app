@@ -4,7 +4,6 @@ import com.rvs.challenge.mcc.currency.dto.RoleDTO;
 import com.rvs.challenge.mcc.currency.dto.UserDTO;
 import com.rvs.challenge.mcc.currency.model.Role;
 import com.rvs.challenge.mcc.currency.model.User;
-import com.rvs.challenge.mcc.currency.repository.RoleRepository;
 import com.rvs.challenge.mcc.currency.repository.UserRepository;
 import com.rvs.challenge.mcc.currency.util.ObjectParserUtil;
 import org.slf4j.Logger;
@@ -14,8 +13,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.lang.invoke.MethodHandles;
-import java.util.Collection;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -28,8 +27,7 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserRepository userRepository;
-    @Autowired
-    private RoleRepository roleRepository;
+
     @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
 
@@ -38,8 +36,6 @@ public class UserServiceImpl implements UserService {
 
         Set<Role> roles = new HashSet<>();
 
-        LOGGER.info("userData\n" + ObjectParserUtil.getInstance().toString(userData));
-
         if(userData.getRoles() != null) {
 
             for (RoleDTO roleData : userData.getRoles()) {
@@ -47,37 +43,34 @@ public class UserServiceImpl implements UserService {
             }
         }
 
-        User user = new User(userData.getId(), userData.getUsername(), bCryptPasswordEncoder.encode(userData.getPassword()), roles);
-
-        LOGGER.info("user\n" + ObjectParserUtil.getInstance().toString(user));
-
-        userRepository.save(user);
+        userRepository.save(new User(userData.getId(), userData.getUsername(), bCryptPasswordEncoder.encode(userData.getPassword()), roles));
     }
 
     @Override
-    public UserDTO findByUsername(String username) {
+    public Optional<UserDTO> findByUsername(String username) {
 
-        LOGGER.info("username " + username);
+        LOGGER.info("findByUsername - {}", username);
 
-        User searchedUser = userRepository.findByUsername(username);
+        Optional<User> searchedUser = userRepository.findByUsername(username);
+        LOGGER.info("findByUsername - {}", searchedUser.isPresent());
+
         UserDTO userData = null;
 
-        if(searchedUser != null) {
-            LOGGER.info("searchedUser\n" + ObjectParserUtil.getInstance().toString(searchedUser));
+        if (searchedUser.isPresent()) {
+
+            LOGGER.info("findByUsername - searchedUser.isPresent() {}", ObjectParserUtil.getInstance().toString(searchedUser.get()));
 
             Set<RoleDTO> rolesData = new HashSet<>();
 
-            if(searchedUser.getRoles() != null) {
-                for (Role userRole : searchedUser.getRoles()) {
+            if(searchedUser.get().getRoles() != null) {
+                for (Role userRole : searchedUser.get().getRoles()) {
                     rolesData.add(new RoleDTO(userRole.getId(), userRole.getName()));
                 }
             }
 
-            userData = new UserDTO(searchedUser.getId(), searchedUser.getUsername(), searchedUser.getPassword(), rolesData);
-
-            LOGGER.info("userData\n" + ObjectParserUtil.getInstance().toString(userData));
+            userData = new UserDTO(searchedUser.get().getId(), searchedUser.get().getUsername(), searchedUser.get().getPassword(), rolesData);
         }
 
-        return userData;
+        return Optional.ofNullable(userData);
     }
 }

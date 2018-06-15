@@ -3,7 +3,7 @@ package com.rvs.challenge.mcc.currency.web;
 import com.rvs.challenge.mcc.currency.dto.UserDTO;
 import com.rvs.challenge.mcc.currency.service.SecurityService;
 import com.rvs.challenge.mcc.currency.service.UserService;
-import com.rvs.challenge.mcc.currency.validator.UserValidator;
+import com.rvs.challenge.mcc.currency.web.validator.UserValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

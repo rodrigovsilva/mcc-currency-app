@@ -26,14 +26,33 @@
 <body>
 <div class="container">
 
-    <c:if test="${pageContext.request.userPrincipal.name != null}">
-        <form id="logoutForm" method="POST" action="${contextPath}/logout">
-            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
-        </form>
+    <!-- this is header -->
+    <nav class="navbar navbar-inverse">
+        <div class="container">
+            <div class="navbar-header">
+                <a class="navbar-brand" th:href="@{/}">My Currency Converter</a>
+            </div>
+            <div id="navbar" class="collapse navbar-collapse">
+                <ul class="nav navbar-nav">
+                    <li class="active"><a th:href="@{/}">Home</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
 
-        <h2>Welcome ${pageContext.request.userPrincipal.name} | <a onclick="document.forms['logoutForm'].submit()">Logout</a></h2>
+    TESTE
 
-    </c:if>
+    <footer>
+        <c:if test="${pageContext.request.userPrincipal.name != null}">
+            <form id="logoutForm" method="POST" action="${contextPath}/logout">
+                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+            </form>
+
+            <span>Welcome ${pageContext.request.userPrincipal.name} | <a onclick="document.forms['logoutForm'].submit()">Logout</a></span>
+
+        </c:if>
+
+    </footer>
 
 </div>
 <!-- /container -->

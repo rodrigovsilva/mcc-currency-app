@@ -18,6 +18,7 @@ spring:
     console:
       path: /h2-console
       enabled: true
+      authorize-mode: NONE
 
 ## Log settings
 logging:
