@@ -1,0 +1,31 @@
+spring:
+  mvc:
+    view:
+      prefix: /
+      suffix: .jsp
+  messages:
+    basename: validation
+  jpa:
+    hibernate:
+      ddl-auto: create
+    show-sql: true
+  datasource:
+    url: jdbc:h2:mem:currencydb;DB_CLOSE_DELAY=- 1;DB_CLOSE_ON_EXIT=FALSE
+    driverClassName: org.h2.Driver
+    username: sa
+    password:
+  h2:
+    console:
+      path: /h2-console
+      enabled: true
+
+## Log settings
+logging:
+    level:
+        org.springframework.web: ALL
+        org.hibernate: ALL
+        com.rvfs.challenge: ALL
+    pattern:
+        console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+        file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    file: logs/spring-boot-logging.log
