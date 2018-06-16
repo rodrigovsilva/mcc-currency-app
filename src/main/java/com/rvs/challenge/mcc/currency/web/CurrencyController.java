@@ -16,6 +16,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.lang.invoke.MethodHandles;
+import java.util.List;
 
 @Controller
 public class CurrencyController {
@@ -51,7 +52,11 @@ public class CurrencyController {
     public String convert(@ModelAttribute("conversionForm") CurrencyConversionDTO conversionForm, BindingResult bindingResult, Model model) {
 
         LOGGER.info("convert {} ", ObjectParserUtil.getInstance().toString(conversionForm));
-        model.addAttribute("conversionRates", currencyConverterService.getConversionRates(conversionForm));
+        model.addAttribute("conversionForm", conversionForm);
+        model.addAttribute("availableCurrencies", AvailableCurrencies.values());
+        CurrencyConversionDTO conversionRates = currencyConverterService.getConversionRates(conversionForm);
+        model.addAttribute("conversionRates", conversionRates);
+        LOGGER.info("conversionRates on Controller {} ", ObjectParserUtil.getInstance().toString(conversionRates));
 
         return "main";
     }

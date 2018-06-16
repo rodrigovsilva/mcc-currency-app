@@ -1,6 +1,7 @@
 package com.rvs.challenge.mcc.currency.web;
 
 import com.rvs.challenge.mcc.currency.domain.AvailableCurrencies;
+import com.rvs.challenge.mcc.currency.dto.CurrencyConversionDTO;
 import com.rvs.challenge.mcc.currency.dto.UserDTO;
 import com.rvs.challenge.mcc.currency.service.CurrencyConversionService;
 import com.rvs.challenge.mcc.currency.service.SecurityService;
@@ -49,6 +50,7 @@ public class UserController {
 
     @RequestMapping(value = "/registration", method = RequestMethod.POST)
     public String registration(@ModelAttribute("userForm") UserDTO userForm, BindingResult bindingResult, Model model) {
+
         userValidator.validate(userForm, bindingResult);
 
         if (bindingResult.hasErrors()) {
@@ -76,6 +78,7 @@ public class UserController {
     @RequestMapping(value = {"/", "/main"}, method = RequestMethod.GET)
     public String main(Model model) {
 
+        model.addAttribute("conversionForm", new CurrencyConversionDTO());
         model.addAttribute("availableCurrencies", AvailableCurrencies.values());
         model.addAttribute("historicalConversions", currencyConversionService.getHistoricalCurrencyConversions(10));
 
