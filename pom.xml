@@ -4,8 +4,9 @@
     <artifactId>mcc-currency-app</artifactId>
     <name>mcc-currency-app</name>
     <description>mcc-currency-app</description>
-    <version>${project.version}</version>
+    <version>1.0.0-SNAPSHOT</version>
     <packaging>jar</packaging>
+
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
