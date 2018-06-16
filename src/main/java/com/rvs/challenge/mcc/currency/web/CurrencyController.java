@@ -27,7 +27,7 @@ public class CurrencyController {
     private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     @Autowired
-    CurrencyConversionService currencyConverterService;
+    CurrencyConversionService currencyConversionService;
 
     /*@ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/convert")
@@ -51,12 +51,18 @@ public class CurrencyController {
     @RequestMapping(value = {"/convert"}, method = RequestMethod.POST)
     public String convert(@ModelAttribute("conversionForm") CurrencyConversionDTO conversionForm, BindingResult bindingResult, Model model) {
 
+        CurrencyConversionDTO conversionRate = currencyConversionService.convert(conversionForm);
+        List<CurrencyConversionDTO> historicalConversions = currencyConversionService.getHistoricalCurrencyConversions(10);
+
         LOGGER.info("convert {} ", ObjectParserUtil.getInstance().toString(conversionForm));
         model.addAttribute("conversionForm", conversionForm);
         model.addAttribute("availableCurrencies", AvailableCurrencies.values());
-        CurrencyConversionDTO conversionRates = currencyConverterService.getConversionRates(conversionForm);
-        model.addAttribute("conversionRates", conversionRates);
-        LOGGER.info("conversionRates on Controller {} ", ObjectParserUtil.getInstance().toString(conversionRates));
+        model.addAttribute("conversionRate", conversionRate);
+        model.addAttribute("historicalConversions", historicalConversions);
+
+        LOGGER.info("historicalConversions on Controller {} ", ObjectParserUtil.getInstance().toString(historicalConversions));
+
+        LOGGER.info("conversionRates on Controller {} ", ObjectParserUtil.getInstance().toString(conversionRate));
 
         return "main";
     }

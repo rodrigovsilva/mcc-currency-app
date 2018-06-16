@@ -4,6 +4,7 @@ import com.rvs.challenge.mcc.currency.dto.CurrencyConversionDTO;
 import com.rvs.challenge.mcc.currency.dto.ExchangeRateDTO;
 import com.rvs.challenge.mcc.currency.exception.ConversionRatesException;
 import com.rvs.challenge.mcc.currency.model.CurrencyConversion;
+import com.rvs.challenge.mcc.currency.model.ExchangeRate;
 import com.rvs.challenge.mcc.currency.repository.CurrencyConversionRepository;
 import com.rvs.challenge.mcc.currency.service.currencyconverter.ConversionRates;
 import com.rvs.challenge.mcc.currency.util.Constants;
@@ -25,11 +26,9 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.lang.invoke.MethodHandles;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Implementation of all currency converter services.
@@ -49,13 +48,13 @@ public class CurrencyConversionServiceImpl implements CurrencyConversionService 
     private CurrencyConversionRepository currencyConversionRepository;
 
     @Override
-    public CurrencyConversionDTO getConversionRates(CurrencyConversionDTO currencyConversionData) {
+    public CurrencyConversionDTO convert(CurrencyConversionDTO currencyConversionData) {
 
-        LOGGER.info("getConversionRates: {}", ObjectParserUtil.getInstance().toString(currencyConversionData));
+        LOGGER.info("convert: {}", ObjectParserUtil.getInstance().toString(currencyConversionData));
         MultiValueMap<String, String> uriVariables = new LinkedMultiValueMap<>();
         uriVariables.add("access_key", env.getProperty(Constants.CURRENCY_API_KEY));
-        //uriVariables.add("currencies", target.getCode());
-        uriVariables.add("source", currencyConversionData.getExchange());
+        uriVariables.add("currencies", currencyConversionData.getExchangeFrom());
+        uriVariables.add("source", currencyConversionData.getExchangeFrom());
         uriVariables.add("format", "1");
 
         //http://www.mocky.io/v2/5b199e6d3000005a00da17c7
@@ -68,26 +67,44 @@ public class CurrencyConversionServiceImpl implements CurrencyConversionService 
         RestTemplate restTemplate = new RestTemplate();
         ConversionRates conversionRates = restTemplate.getForObject(uriComponents.toUri(), ConversionRates.class);
 
-        LOGGER.info("getConversionRates: conversionRates {}", ObjectParserUtil.getInstance().toString(conversionRates));
+        LOGGER.info("convert: conversionRates {}", ObjectParserUtil.getInstance().toString(conversionRates));
 
         if (conversionRates.getSuccess()) {
+
+            // updating rates timestamp
             Calendar timestamp = Calendar.getInstance();
             timestamp.setTimeInMillis(conversionRates.getTimestamp());
+
             currencyConversionData.setTimestamp(timestamp);
 
+
+            // if there is quotes from results
             if (conversionRates.getQuotes() != null) {
-                List<ExchangeRateDTO> exchangeRates = conversionRates.getQuotes().entrySet().stream()
-                        .map(e -> new ExchangeRateDTO(
+
+                // get all exchange rates to cache
+                Set<ExchangeRate> exchangeRates = conversionRates.getQuotes().entrySet().stream()
+                        .map(e -> new ExchangeRate(
                                 StringUtils.substringAfter(e.getKey(), conversionRates.getSource()), e.getValue()))
-                        .collect(Collectors.toList());
-                currencyConversionData.setExchangeRates(exchangeRates);
+                        .collect(Collectors.toSet());
+
+                // filter the exchange to conversion rate
+                Set<ExchangeRate> filteredRates = exchangeRates.stream()
+                        .filter(er -> StringUtils.equalsIgnoreCase(er.getExchange(), currencyConversionData.getExchangeTo())).collect(Collectors.toSet());
+
+                // if there is rate, update it on currency conversion object
+                if (filteredRates != null) {
+                    currencyConversionData.setRate(filteredRates.iterator().next().getRate());
+                }
+
             }
+
+            currencyConversionRepository.save(new CurrencyConversion(currencyConversionData.getExchangeFrom(),currencyConversionData.getExchangeTo(), currencyConversionData.getTimestamp(), currencyConversionData.getRate()));
 
         } else {
             throw new ConversionRatesException(conversionRates.getError().getInfo());
         }
 
-        LOGGER.info("getConversionRates: currencyConversionData {}", ObjectParserUtil.getInstance().toString(currencyConversionData));
+        LOGGER.info("convert: currencyConversionData {}", ObjectParserUtil.getInstance().toString(currencyConversionData));
 
 
         return currencyConversionData;
@@ -95,7 +112,7 @@ public class CurrencyConversionServiceImpl implements CurrencyConversionService 
 
     @Override
     public List<CurrencyConversionDTO> getHistoricalCurrencyConversions(int listSize) {
-        Pageable pageable = new PageRequest(0, listSize, Sort.Direction.DESC, "timestamp");
+        Pageable pageable = new PageRequest(0, listSize, Sort.Direction.DESC, "createdAt");
 
         Optional<Page<CurrencyConversion>> currencyConversions = currencyConversionRepository.findAll(pageable);
 
@@ -103,14 +120,13 @@ public class CurrencyConversionServiceImpl implements CurrencyConversionService 
         //List<CurrencyConversion> bottomUsersList = bottomPage.getContent();
 
         //Collections.inverse(currencyConversions);
+
+        // serialize conversion model list to dto list
         return currencyConversions.isPresent()
                 ? currencyConversions.get().getContent()
                 .parallelStream()
-                .map(c -> new CurrencyConversionDTO(c.getExchange(), c.getTimestamp(),
-                        Optional.ofNullable(c.getExchangeRates()).isPresent()
-                                ? c.getExchangeRates().parallelStream()
-                                .map(er -> new ExchangeRateDTO(er.getExchange(), er.getRate())).collect(Collectors.toList())
-                                : new ArrayList<>())).collect(Collectors.toList())
+                .map(c -> new CurrencyConversionDTO(c.getExchangeFrom(), c.getTimestamp(),
+                        c.getExchangeTo(), c.getRate(), c.getCreatedAt())).collect(Collectors.toList())
                 : new ArrayList<>();
     }
 }

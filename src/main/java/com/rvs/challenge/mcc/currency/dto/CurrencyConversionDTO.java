@@ -1,34 +1,40 @@
 package com.rvs.challenge.mcc.currency.dto;
 
+import java.math.BigDecimal;
 import java.util.Calendar;
-import java.util.List;
 
 /**
  * CurrencyConversion Result data transfer object.
  */
 public class CurrencyConversionDTO {
 
-    private String exchange;
+    private String exchangeFrom;
 
     private Calendar timestamp;
 
-    private List<ExchangeRateDTO> exchangeRates;
+    private String exchangeTo;
 
-    public CurrencyConversionDTO(String exchange, Calendar timestamp, List<ExchangeRateDTO> exchangeRates) {
-        this.exchange = exchange;
-        this.timestamp = timestamp;
-        this.exchangeRates = exchangeRates;
-    }
+    private BigDecimal rate;
+
+    private Calendar createdAt;
 
     public CurrencyConversionDTO() {
     }
 
-    public String getExchange() {
-        return exchange;
+    public CurrencyConversionDTO(String exchangeFrom, Calendar timestamp, String exchangeTo, BigDecimal rate, Calendar createdAt) {
+        this.exchangeFrom = exchangeFrom;
+        this.timestamp = timestamp;
+        this.exchangeTo = exchangeTo;
+        this.rate = rate;
+        this.createdAt = createdAt;
     }
 
-    public void setExchange(String exchange) {
-        this.exchange = exchange;
+    public String getExchangeFrom() {
+        return exchangeFrom;
+    }
+
+    public void setExchangeFrom(String exchangeFrom) {
+        this.exchangeFrom = exchangeFrom;
     }
 
     public Calendar getTimestamp() {
@@ -39,12 +45,29 @@ public class CurrencyConversionDTO {
         this.timestamp = timestamp;
     }
 
-    public List<ExchangeRateDTO> getExchangeRates() {
-        return exchangeRates;
+    public String getExchangeTo() {
+        return exchangeTo;
     }
 
-    public void setExchangeRates(List<ExchangeRateDTO> exchangeRates) {
-        this.exchangeRates = exchangeRates;
+    public void setExchangeTo(String exchangeTo) {
+        this.exchangeTo = exchangeTo;
+    }
+
+    public BigDecimal getRate() {
+        return rate;
+    }
+
+    public void setRate(BigDecimal rate) {
+        this.rate = rate;
+    }
+
+    public Calendar getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Calendar createdAt) {
+        this.createdAt = createdAt;
     }
 }
+
 

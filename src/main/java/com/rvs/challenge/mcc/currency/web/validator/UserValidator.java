@@ -3,6 +3,7 @@ package com.rvs.challenge.mcc.currency.web.validator;
 import com.rvs.challenge.mcc.currency.dto.UserDTO;
 import com.rvs.challenge.mcc.currency.model.User;
 import com.rvs.challenge.mcc.currency.service.UserService;
+import org.apache.commons.validator.routines.EmailValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
@@ -25,6 +26,11 @@ public class UserValidator implements Validator {
         UserDTO user = (UserDTO) o;
 
         ValidationUtils.rejectIfEmptyOrWhitespace(errors, "username", "NotEmpty");
+
+        if(!EmailValidator.getInstance().isValid(user.getUsername())){
+            errors.rejectValue("username", "Email.userForm.invalid");
+        }
+
         if (user.getUsername().length() < 6 || user.getUsername().length() > 32) {
             errors.rejectValue("username", "Size.userForm.username");
         }

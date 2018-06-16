@@ -10,12 +10,12 @@ import java.util.List;
 public interface CurrencyConversionService {
 
     /**
-     * Get the conversion rates of a currency.
+     * Get the conversion rate of a currency.
      *
      * @param conversion CurrencyConversion requested data.
      * @return CurrencyConversion with all available exchange rates.
      */
-    public CurrencyConversionDTO getConversionRates(CurrencyConversionDTO conversion);
+    public CurrencyConversionDTO convert(CurrencyConversionDTO conversion);
 
     /**
      * Find all Currency Conversions.

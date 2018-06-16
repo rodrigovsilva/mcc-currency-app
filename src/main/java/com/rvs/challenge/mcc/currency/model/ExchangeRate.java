@@ -2,6 +2,7 @@ package com.rvs.challenge.mcc.currency.model;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
+import java.util.Objects;
 
 /**
  * Exchange Rates's model.
@@ -39,5 +40,19 @@ public class ExchangeRate {
 
     public void setRate(BigDecimal rate) {
         this.rate = rate;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ExchangeRate that = (ExchangeRate) o;
+        return Objects.equals(exchange, that.exchange);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(exchange);
     }
 }

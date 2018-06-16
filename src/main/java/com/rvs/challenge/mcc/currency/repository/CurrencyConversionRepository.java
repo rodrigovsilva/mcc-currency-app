@@ -11,4 +11,6 @@ public interface CurrencyConversionRepository extends Repository<CurrencyConvers
 
     Optional<Page<CurrencyConversion>> findAll(Pageable page);
 
+    void save(CurrencyConversion currencyConversion);
+
 }
