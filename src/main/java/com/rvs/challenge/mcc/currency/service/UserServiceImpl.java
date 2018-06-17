@@ -31,12 +31,15 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
 
+    @Autowired
+    private SecurityService securityService;
+
     @Override
     public void save(UserDTO userData) {
 
         Set<Role> roles = new HashSet<>();
 
-        if(userData.getRoles() != null) {
+        if (userData.getRoles() != null) {
 
             for (RoleDTO roleData : userData.getRoles()) {
                 roles.add(new Role(roleData.getId(), roleData.getName()));
@@ -52,6 +55,7 @@ public class UserServiceImpl implements UserService {
         LOGGER.info("findByUsername - {}", username);
 
         Optional<User> searchedUser = userRepository.findByUsername(username);
+
         LOGGER.info("findByUsername - {}", searchedUser.isPresent());
 
         UserDTO userData = null;
@@ -62,7 +66,7 @@ public class UserServiceImpl implements UserService {
 
             Set<RoleDTO> rolesData = new HashSet<>();
 
-            if(searchedUser.get().getRoles() != null) {
+            if (searchedUser.get().getRoles() != null) {
                 for (Role userRole : searchedUser.get().getRoles()) {
                     rolesData.add(new RoleDTO(userRole.getId(), userRole.getName()));
                 }
@@ -72,5 +76,16 @@ public class UserServiceImpl implements UserService {
         }
 
         return Optional.ofNullable(userData);
+    }
+
+    @Override
+    public Optional<UserDTO> findLoggedUser() {
+
+        String username = securityService.findLoggedInUsername();
+
+        LOGGER.info("findLoggedUser - {}", username);
+
+        return this.findByUsername(username);
+
     }
 }

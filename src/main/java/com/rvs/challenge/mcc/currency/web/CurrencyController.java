@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -29,41 +30,34 @@ public class CurrencyController {
     @Autowired
     CurrencyConversionService currencyConversionService;
 
-    /*@ResponseStatus(HttpStatus.CREATED)
-    @PostMapping("/convert")
-    public ResponseEntity<Object> convert(@ModelAttribute("userForm") CurrencyConversionDTO currencyConversionForm, BindingResult bindingResult, Model model) {
-
-        ResponseEntity<Object> responseEntity = null;
-
-        try {
-
-            responseEntity = new ResponseEntity<>(currencyConverterService.getConversionRates(currencyConversionForm), HttpStatus.OK);
-
-        } catch (Exception e) {
-            LOGGER.error(e.getMessage(), e);
-            //responseEntity = new ResponseEntity<>(new ApiErrorDTO(HttpStatus.INTERNAL_SERVER_ERROR, e.getLocalizedMessage(), e.getLocalizedMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
-            responseEntity = new ResponseEntity<>("Ocorreu um erro ao acessar a operação.", HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-        return responseEntity;
-
-    }*/
 
     @RequestMapping(value = {"/convert"}, method = RequestMethod.POST)
     public String convert(@ModelAttribute("conversionForm") CurrencyConversionDTO conversionForm, BindingResult bindingResult, Model model) {
 
-        CurrencyConversionDTO conversionRate = currencyConversionService.convert(conversionForm);
-        List<CurrencyConversionDTO> historicalConversions = currencyConversionService.getHistoricalCurrencyConversions(10);
+        try {
+            CurrencyConversionDTO conversionRate = currencyConversionService.convert(conversionForm);
+            List<CurrencyConversionDTO> historicalConversions = currencyConversionService.getHistoricalCurrencyConversions(10);
 
-        LOGGER.info("convert {} ", ObjectParserUtil.getInstance().toString(conversionForm));
-        model.addAttribute("conversionForm", conversionForm);
-        model.addAttribute("availableCurrencies", AvailableCurrencies.values());
-        model.addAttribute("conversionRate", conversionRate);
-        model.addAttribute("historicalConversions", historicalConversions);
+            LOGGER.info("convert {} ", ObjectParserUtil.getInstance().toString(conversionForm));
 
-        LOGGER.info("historicalConversions on Controller {} ", ObjectParserUtil.getInstance().toString(historicalConversions));
+            model.addAttribute("conversionForm", new CurrencyConversionDTO());
+            model.addAttribute("availableCurrencies", AvailableCurrencies.values());
+            model.addAttribute("conversionRate", conversionRate);
+            model.addAttribute("historicalConversions", historicalConversions);
 
-        LOGGER.info("conversionRates on Controller {} ", ObjectParserUtil.getInstance().toString(conversionRate));
+            LOGGER.info("historicalConversions on Controller {} ", ObjectParserUtil.getInstance().toString(historicalConversions));
 
+            LOGGER.info("conversionRates on Controller {} ", ObjectParserUtil.getInstance().toString(conversionRate));
+
+        }catch (UsernameNotFoundException e) {
+            model.addAttribute("message", "Please, log in to convert currencies.");
+
+            return "login";
+
+        } catch (Exception e) {
+            model.addAttribute("error", "Something is going wrong. Please, try later.");
+
+        }
         return "main";
     }
 }

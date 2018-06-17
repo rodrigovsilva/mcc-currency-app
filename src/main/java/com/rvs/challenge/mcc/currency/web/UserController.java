@@ -78,11 +78,16 @@ public class UserController {
     @RequestMapping(value = {"/", "/main"}, method = RequestMethod.GET)
     public String main(Model model) {
 
-        model.addAttribute("conversionForm", new CurrencyConversionDTO());
-        model.addAttribute("availableCurrencies", AvailableCurrencies.values());
-        model.addAttribute("historicalConversions", currencyConversionService.getHistoricalCurrencyConversions(10));
+        try {
+            model.addAttribute("conversionForm", new CurrencyConversionDTO());
+            model.addAttribute("availableCurrencies", AvailableCurrencies.values());
+            model.addAttribute("historicalConversions", currencyConversionService.getHistoricalCurrencyConversions(10));
 
-        LOGGER.info("main {} ", ObjectParserUtil.getInstance().toString(AvailableCurrencies.values()));
+            LOGGER.info("main {} ", ObjectParserUtil.getInstance().toString(AvailableCurrencies.values()));
+        } catch (Exception e) {
+            model.addAttribute("error", "Something is going wrong. Please, try later.");
+            return "login";
+        }
         return "main";
     }
 }

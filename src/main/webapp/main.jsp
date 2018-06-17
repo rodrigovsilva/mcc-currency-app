@@ -75,7 +75,7 @@
             </div>
             <c:if test="${not empty conversionRate}">
                 <div class="row col-md-12">
-                    <h3>1 <c:out value="${conversionRate.exchangeFrom}"/> = <c:out value="${conversionRate.rate}"/> <c:out value="${conversionRate.exchangeTo}"/></h3>
+                    <h3>1 <c:out value="${conversionRate.exchangeFrom}"/> = <fmt:formatNumber value="${conversionRate.rate}" minFractionDigits="2" maxFractionDigits="2"/><c:out value="${conversionRate.exchangeTo}"/></h3>
                 </div>
             </c:if>
         </form:form>
@@ -83,7 +83,7 @@
 
         <c:if test="${not empty historicalConversions}">
             <div class="row col-md-12">
-                <h2>Last 10 conversions</h2>
+                <h4>Last 10 conversions</h4>
                 <table id="tableClient" class="table table-bordered table-striped col-md-12">
                     <thead>
                         <tr>
@@ -99,7 +99,7 @@
                                 <td class="col-md-3"><fmt:formatDate type="both" value="${conversion.createdAt.time}"/></td>
                                 <td class="col-md-3"><c:out value="${conversion.exchangeFrom}"/></td>
                                 <td class="col-md-3"><c:out value="${conversion.exchangeTo}"/></td>
-                                <td class="col-md-3"><c:out value="${conversion.rate}"/></td>
+                                <td class="col-md-3"><fmt:formatNumber value="${conversion.rate}" minFractionDigits="2" maxFractionDigits="2"/></td>
                             </tr>
                         </c:forEach>
                     </tbody>

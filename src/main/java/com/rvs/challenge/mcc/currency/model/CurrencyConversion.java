@@ -5,6 +5,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Calendar;
 
@@ -16,13 +17,13 @@ import java.util.Calendar;
 @JsonIgnoreProperties(value = {"createdAt", "updatedAt"},
         allowGetters = true)
 
-@Table(name = "CurrencyConversion")
-public class CurrencyConversion {
+@Table(name = "currencyConversion")
+public class CurrencyConversion implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Basic(optional = false)
-    @Column(name = "id", unique = true, nullable = false)
+    @Column(name = "conversion_id", unique = true, nullable = false)
     private Long id;
 
     private String exchangeFrom;
@@ -33,26 +34,29 @@ public class CurrencyConversion {
 
     private BigDecimal rate;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    private User user;
 
     @Column(nullable = false, updatable = false)
     @Temporal(TemporalType.TIMESTAMP)
     @CreatedDate
     private Calendar createdAt;
 
-    public CurrencyConversion(Long id, String exchangeFrom, String exchangeTo, Calendar timestamp, BigDecimal rate, Calendar createdAt) {
+    public CurrencyConversion(Long id, String exchangeFrom, String exchangeTo, Calendar timestamp, BigDecimal rate, User user) {
         this.id = id;
         this.exchangeFrom = exchangeFrom;
         this.exchangeTo = exchangeTo;
         this.timestamp = timestamp;
         this.rate = rate;
-        this.createdAt = createdAt;
+        this.user = user;
     }
 
-    public CurrencyConversion(String exchangeFrom, String exchangeTo, Calendar timestamp, BigDecimal rate) {
+    public CurrencyConversion(String exchangeFrom, String exchangeTo, Calendar timestamp, BigDecimal rate, User user) {
         this.exchangeFrom = exchangeFrom;
         this.exchangeTo = exchangeTo;
         this.timestamp = timestamp;
         this.rate = rate;
+        this.user = user;
     }
 
     public CurrencyConversion() {
@@ -104,6 +108,14 @@ public class CurrencyConversion {
 
     public void setCreatedAt(Calendar createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }
 

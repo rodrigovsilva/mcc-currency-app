@@ -5,7 +5,9 @@ import com.rvs.challenge.mcc.currency.dto.ExchangeRateDTO;
 import com.rvs.challenge.mcc.currency.exception.ConversionRatesException;
 import com.rvs.challenge.mcc.currency.model.CurrencyConversion;
 import com.rvs.challenge.mcc.currency.model.ExchangeRate;
+import com.rvs.challenge.mcc.currency.model.User;
 import com.rvs.challenge.mcc.currency.repository.CurrencyConversionRepository;
+import com.rvs.challenge.mcc.currency.repository.UserRepository;
 import com.rvs.challenge.mcc.currency.service.currencyconverter.ConversionRates;
 import com.rvs.challenge.mcc.currency.util.Constants;
 import com.rvs.challenge.mcc.currency.util.ObjectParserUtil;
@@ -18,6 +20,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -47,86 +50,109 @@ public class CurrencyConversionServiceImpl implements CurrencyConversionService 
     @Autowired
     private CurrencyConversionRepository currencyConversionRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private SecurityService securityService;
+
     @Override
     public CurrencyConversionDTO convert(CurrencyConversionDTO currencyConversionData) {
 
-        LOGGER.info("convert: {}", ObjectParserUtil.getInstance().toString(currencyConversionData));
-        MultiValueMap<String, String> uriVariables = new LinkedMultiValueMap<>();
-        uriVariables.add("access_key", env.getProperty(Constants.CURRENCY_API_KEY));
-        uriVariables.add("currencies", currencyConversionData.getExchangeFrom());
-        uriVariables.add("source", currencyConversionData.getExchangeFrom());
-        uriVariables.add("format", "1");
+        Optional<User> searchedUser = userRepository.findByUsername(securityService.findLoggedInUsername());
 
-        //http://www.mocky.io/v2/5b199e6d3000005a00da17c7
+        if(searchedUser.isPresent()) {
+            LOGGER.info("convert: {}", ObjectParserUtil.getInstance().toString(currencyConversionData));
+            MultiValueMap<String, String> uriVariables = new LinkedMultiValueMap<>();
+            uriVariables.add("access_key", env.getProperty(Constants.CURRENCY_API_KEY));
+            uriVariables.add("currencies", currencyConversionData.getExchangeFrom());
+            uriVariables.add("source", currencyConversionData.getExchangeFrom());
+            uriVariables.add("format", "1");
+
+            //http://www.mocky.io/v2/5b199e6d3000005a00da17c7
         /*UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(env.getProperty(Constants.CURRENCY_API_BASE_URL))
                 .queryParams(uriVariables).build();*/
 
-        UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl("http://www.mocky.io/v2/5b23469c2f00006a00e09483")
-                .queryParams(uriVariables).build();
+            UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl("http://www.mocky.io/v2/5b23469c2f00006a00e09483")
+                    .queryParams(uriVariables).build();
 
-        RestTemplate restTemplate = new RestTemplate();
-        ConversionRates conversionRates = restTemplate.getForObject(uriComponents.toUri(), ConversionRates.class);
+            RestTemplate restTemplate = new RestTemplate();
+            ConversionRates conversionRates = restTemplate.getForObject(uriComponents.toUri(), ConversionRates.class);
 
-        LOGGER.info("convert: conversionRates {}", ObjectParserUtil.getInstance().toString(conversionRates));
+            LOGGER.info("convert: conversionRates {}", ObjectParserUtil.getInstance().toString(conversionRates));
 
-        if (conversionRates.getSuccess()) {
-
-            // updating rates timestamp
-            Calendar timestamp = Calendar.getInstance();
-            timestamp.setTimeInMillis(conversionRates.getTimestamp());
-
-            currencyConversionData.setTimestamp(timestamp);
+            if (conversionRates.getSuccess()) {
 
 
-            // if there is quotes from results
-            if (conversionRates.getQuotes() != null) {
+                // updating rates timestamp
+                Calendar timestamp = Calendar.getInstance();
+                timestamp.setTimeInMillis(conversionRates.getTimestamp());
 
-                // get all exchange rates to cache
-                Set<ExchangeRate> exchangeRates = conversionRates.getQuotes().entrySet().stream()
-                        .map(e -> new ExchangeRate(
-                                StringUtils.substringAfter(e.getKey(), conversionRates.getSource()), e.getValue()))
-                        .collect(Collectors.toSet());
+                currencyConversionData.setTimestamp(timestamp);
 
-                // filter the exchange to conversion rate
-                Set<ExchangeRate> filteredRates = exchangeRates.stream()
-                        .filter(er -> StringUtils.equalsIgnoreCase(er.getExchange(), currencyConversionData.getExchangeTo())).collect(Collectors.toSet());
 
-                // if there is rate, update it on currency conversion object
-                if (filteredRates != null) {
-                    currencyConversionData.setRate(filteredRates.iterator().next().getRate());
+                // if there is quotes from results
+                if (conversionRates.getQuotes() != null) {
+
+                    // get all exchange rates to cache
+                    Set<ExchangeRate> exchangeRates = conversionRates.getQuotes().entrySet().stream()
+                            .map(e -> new ExchangeRate(
+                                    StringUtils.substringAfter(e.getKey(), conversionRates.getSource()), e.getValue()))
+                            .collect(Collectors.toSet());
+
+                    // filter the exchange to conversion rate
+                    Set<ExchangeRate> filteredRates = exchangeRates.stream()
+                            .filter(er -> StringUtils.equalsIgnoreCase(er.getExchange(), currencyConversionData.getExchangeTo())).collect(Collectors.toSet());
+
+                    // if there is rate, update it on currency conversion object
+                    if (filteredRates != null) {
+                        currencyConversionData.setRate(filteredRates.iterator().next().getRate());
+                    }
+
                 }
 
+                CurrencyConversion currencyConversionToSave = new CurrencyConversion(currencyConversionData.getExchangeFrom(), currencyConversionData.getExchangeTo(), currencyConversionData.getTimestamp(), currencyConversionData.getRate(), searchedUser.get());
+
+                LOGGER.info("convert: currencyConversionToSave {}", ObjectParserUtil.getInstance().toString(currencyConversionToSave.getUser().getUsername()));
+
+                currencyConversionRepository.save(currencyConversionToSave);
+
+            } else {
+                throw new ConversionRatesException(conversionRates.getError().getInfo());
             }
-
-            currencyConversionRepository.save(new CurrencyConversion(currencyConversionData.getExchangeFrom(),currencyConversionData.getExchangeTo(), currencyConversionData.getTimestamp(), currencyConversionData.getRate()));
-
-        } else {
-            throw new ConversionRatesException(conversionRates.getError().getInfo());
+            } else {
+            throw new UsernameNotFoundException("There is no user logged in or registered on database.");
         }
-
-        LOGGER.info("convert: currencyConversionData {}", ObjectParserUtil.getInstance().toString(currencyConversionData));
-
 
         return currencyConversionData;
     }
 
     @Override
     public List<CurrencyConversionDTO> getHistoricalCurrencyConversions(int listSize) {
-        Pageable pageable = new PageRequest(0, listSize, Sort.Direction.DESC, "createdAt");
 
-        Optional<Page<CurrencyConversion>> currencyConversions = currencyConversionRepository.findAll(pageable);
+        String username = securityService.findLoggedInUsername();
 
-        // this is a list of the last 10 records, you can choose to invert it by using
-        //List<CurrencyConversion> bottomUsersList = bottomPage.getContent();
+        Optional<User> searchedUser = userRepository.findByUsername(username);
 
-        //Collections.inverse(currencyConversions);
+        if(searchedUser.isPresent()) {
+            Pageable pageable = new PageRequest(0, listSize, Sort.Direction.DESC, "createdAt");
 
-        // serialize conversion model list to dto list
-        return currencyConversions.isPresent()
-                ? currencyConversions.get().getContent()
-                .parallelStream()
-                .map(c -> new CurrencyConversionDTO(c.getExchangeFrom(), c.getTimestamp(),
-                        c.getExchangeTo(), c.getRate(), c.getCreatedAt())).collect(Collectors.toList())
-                : new ArrayList<>();
+            Optional<Page<CurrencyConversion>> currencyConversions = currencyConversionRepository.findAllByUser(searchedUser.get(), pageable);
+
+            // this is a list of the last 10 records, you can choose to invert it by using
+            //List<CurrencyConversion> bottomUsersList = bottomPage.getContent();
+
+            //Collections.inverse(currencyConversions);
+
+            // serialize conversion model list to dto list
+            return currencyConversions.isPresent()
+                    ? currencyConversions.get().getContent()
+                    .parallelStream()
+                    .map(c -> new CurrencyConversionDTO(c.getExchangeFrom(), c.getTimestamp(),
+                            c.getExchangeTo(), c.getRate(), c.getCreatedAt())).collect(Collectors.toList())
+                    : new ArrayList<>();
+        } else {
+            return new ArrayList<>();
+        }
     }
 }
