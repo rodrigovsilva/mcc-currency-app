@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.lang.invoke.MethodHandles;
+import java.util.Calendar;
 
 @Controller
 public class UserController {
@@ -79,7 +80,11 @@ public class UserController {
     public String main(Model model) {
 
         try {
-            model.addAttribute("conversionForm", new CurrencyConversionDTO());
+            CurrencyConversionDTO currencyConversionForm = new CurrencyConversionDTO();
+            currencyConversionForm.setTimestamp(Calendar.getInstance());
+
+            model.addAttribute("conversionFormData", currencyConversionForm);
+
             model.addAttribute("availableCurrencies", AvailableCurrencies.values());
             model.addAttribute("historicalConversions", currencyConversionService.getHistoricalCurrencyConversions(10));
 

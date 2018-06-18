@@ -5,18 +5,22 @@ import com.rvs.challenge.mcc.currency.dto.CurrencyConversionDTO;
 import com.rvs.challenge.mcc.currency.dto.UserDTO;
 import com.rvs.challenge.mcc.currency.service.CurrencyConversionService;
 import com.rvs.challenge.mcc.currency.util.ObjectParserUtil;
+import com.rvs.challenge.mcc.currency.web.property.editor.CustomCalendarEditor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
 import java.lang.invoke.MethodHandles;
+import java.util.Calendar;
 import java.util.List;
 
 @Controller
@@ -32,7 +36,7 @@ public class CurrencyController {
 
 
     @RequestMapping(value = {"/convert"}, method = RequestMethod.POST)
-    public String convert(@ModelAttribute("conversionForm") CurrencyConversionDTO conversionForm, BindingResult bindingResult, Model model) {
+    public String convert(@ModelAttribute("conversionFormData") CurrencyConversionDTO conversionForm, BindingResult bindingResult, Model model) {
 
         try {
             CurrencyConversionDTO conversionRate = currencyConversionService.convert(conversionForm);
@@ -40,7 +44,10 @@ public class CurrencyController {
 
             LOGGER.info("convert {} ", ObjectParserUtil.getInstance().toString(conversionForm));
 
-            model.addAttribute("conversionForm", new CurrencyConversionDTO());
+            CurrencyConversionDTO newConversionFormData = new CurrencyConversionDTO();
+            newConversionFormData.setTimestamp(Calendar.getInstance());
+
+            model.addAttribute("conversionFormData", newConversionFormData);
             model.addAttribute("availableCurrencies", AvailableCurrencies.values());
             model.addAttribute("conversionRate", conversionRate);
             model.addAttribute("historicalConversions", historicalConversions);
@@ -59,5 +66,10 @@ public class CurrencyController {
 
         }
         return "main";
+    }
+
+    @InitBinder("conversionFormData")
+    public void initBinder(WebDataBinder webDataBinder) {
+        webDataBinder.registerCustomEditor(Calendar.class, new CustomCalendarEditor());
     }
 }
