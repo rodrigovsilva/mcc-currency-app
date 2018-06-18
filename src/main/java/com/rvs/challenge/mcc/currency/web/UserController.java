@@ -7,10 +7,12 @@ import com.rvs.challenge.mcc.currency.service.CurrencyConversionService;
 import com.rvs.challenge.mcc.currency.service.SecurityService;
 import com.rvs.challenge.mcc.currency.service.UserService;
 import com.rvs.challenge.mcc.currency.util.ObjectParserUtil;
-import com.rvs.challenge.mcc.currency.web.validator.UserValidator;
+import com.rvs.challenge.mcc.currency.web.validator.UserRegistrationValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -20,7 +22,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.lang.invoke.MethodHandles;
 import java.util.Calendar;
+import java.util.Locale;
 
+/**
+ * User controller.
+ */
 @Controller
 public class UserController {
 
@@ -40,8 +46,17 @@ public class UserController {
     private SecurityService securityService;
 
     @Autowired
-    private UserValidator userValidator;
+    private UserRegistrationValidator userRegistrationValidator;
 
+    @Autowired
+    private MessageSource messageSource;
+
+    /**
+     * Open User registration screen.
+     *
+     * @param model data model
+     * @return Router
+     */
     @RequestMapping(value = "/registration", method = RequestMethod.GET)
     public String registration(Model model) {
         model.addAttribute("userForm", new UserDTO());
@@ -49,33 +64,70 @@ public class UserController {
         return "registration";
     }
 
+    /**
+     * Register a user.
+     *
+     * @param userForm      User form.
+     * @param bindingResult binding result.
+     * @param model         data model.
+     * @return Router.
+     */
     @RequestMapping(value = "/registration", method = RequestMethod.POST)
     public String registration(@ModelAttribute("userForm") UserDTO userForm, BindingResult bindingResult, Model model) {
+        try {
+            userRegistrationValidator.validate(userForm, bindingResult);
 
-        userValidator.validate(userForm, bindingResult);
+            if (bindingResult.hasErrors()) {
+                return "registration";
+            }
 
-        if (bindingResult.hasErrors()) {
-            return "registration";
+            userService.save(userForm);
+
+            securityService.autologin(userForm.getUsername(), userForm.getPasswordConfirm());
+        } catch (UsernameNotFoundException e) {
+            model.addAttribute("message", "Please, log in to convert currencies.");
+            return "login";
+
+        } catch (Exception e) {
+            model.addAttribute("error", "Something is going wrong. Please, try later.");
+
         }
-
-        userService.save(userForm);
-
-        securityService.autologin(userForm.getUsername(), userForm.getPasswordConfirm());
-
         return "redirect:/main";
     }
 
+    /**
+     * Open User login screen.
+     *
+     * @param model  Data model
+     * @param error  errors.
+     * @param logout logout parameter.
+     * @return Router.
+     */
     @RequestMapping(value = "/login", method = RequestMethod.GET)
     public String login(Model model, String error, String logout) {
-        if (error != null)
-            model.addAttribute("error", "Your username and password is invalid.");
+        try {
+            if (error != null)
+                model.addAttribute("error", messageSource.getMessage("Credentials.loginForm.invalid", null, Locale.getDefault()));
 
-        if (logout != null)
-            model.addAttribute("message", "You have been logged out successfully.");
+            if (logout != null)
+                model.addAttribute("message", messageSource.getMessage("Logout.success", null, Locale.getDefault()));
+        }catch (UsernameNotFoundException e) {
+            model.addAttribute("message", "Please, log in to convert currencies.");
+            return "login";
 
+        } catch (Exception e) {
+            model.addAttribute("error", "Something is going wrong. Please, try later.");
+
+        }
         return "login";
     }
 
+    /**
+     * Open main screen.
+     *
+     * @param model data model.
+     * @return Router.
+     */
     @RequestMapping(value = {"/", "/main"}, method = RequestMethod.GET)
     public String main(Model model) {
 
@@ -90,7 +142,7 @@ public class UserController {
 
             LOGGER.info("main {} ", ObjectParserUtil.getInstance().toString(AvailableCurrencies.values()));
         } catch (Exception e) {
-            model.addAttribute("error", "Something is going wrong. Please, try later.");
+            model.addAttribute("error", messageSource.getMessage("Global.error", null, Locale.getDefault()));
             return "login";
         }
         return "main";

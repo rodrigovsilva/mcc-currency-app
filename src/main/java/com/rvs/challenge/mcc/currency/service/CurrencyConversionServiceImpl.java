@@ -1,7 +1,6 @@
 package com.rvs.challenge.mcc.currency.service;
 
 import com.rvs.challenge.mcc.currency.dto.CurrencyConversionDTO;
-import com.rvs.challenge.mcc.currency.dto.ExchangeRateDTO;
 import com.rvs.challenge.mcc.currency.exception.ConversionRatesException;
 import com.rvs.challenge.mcc.currency.model.CurrencyConversion;
 import com.rvs.challenge.mcc.currency.model.ExchangeRate;
@@ -31,7 +30,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.lang.invoke.MethodHandles;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Implementation of all currency converter services.
@@ -62,7 +60,9 @@ public class CurrencyConversionServiceImpl implements CurrencyConversionService 
         Optional<User> searchedUser = userRepository.findByUsername(securityService.findLoggedInUsername());
 
         if(searchedUser.isPresent()) {
+
             LOGGER.info("convert: {}", ObjectParserUtil.getInstance().toString(currencyConversionData));
+
             MultiValueMap<String, String> uriVariables = new LinkedMultiValueMap<>();
             uriVariables.add("access_key", env.getProperty(Constants.CURRENCY_API_KEY));
             uriVariables.add("currencies", currencyConversionData.getExchangeFrom());
@@ -83,13 +83,11 @@ public class CurrencyConversionServiceImpl implements CurrencyConversionService 
 
             if (conversionRates.getSuccess()) {
 
-
                 // updating rates timestamp
                 Calendar timestamp = Calendar.getInstance();
                 timestamp.setTimeInMillis(conversionRates.getTimestamp());
 
                 currencyConversionData.setTimestamp(timestamp);
-
 
                 // if there is quotes from results
                 if (conversionRates.getQuotes() != null) {
@@ -120,7 +118,7 @@ public class CurrencyConversionServiceImpl implements CurrencyConversionService 
             } else {
                 throw new ConversionRatesException(conversionRates.getError().getInfo());
             }
-            } else {
+        } else {
             throw new UsernameNotFoundException("There is no user logged in or registered on database.");
         }
 
@@ -138,11 +136,6 @@ public class CurrencyConversionServiceImpl implements CurrencyConversionService 
             Pageable pageable = new PageRequest(0, listSize, Sort.Direction.DESC, "createdAt");
 
             Optional<Page<CurrencyConversion>> currencyConversions = currencyConversionRepository.findAllByUser(searchedUser.get(), pageable);
-
-            // this is a list of the last 10 records, you can choose to invert it by using
-            //List<CurrencyConversion> bottomUsersList = bottomPage.getContent();
-
-            //Collections.inverse(currencyConversions);
 
             // serialize conversion model list to dto list
             return currencyConversions.isPresent()

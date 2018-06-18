@@ -6,6 +6,8 @@ import com.rvs.challenge.mcc.currency.dto.UserDTO;
 import com.rvs.challenge.mcc.currency.service.CurrencyConversionService;
 import com.rvs.challenge.mcc.currency.util.ObjectParserUtil;
 import com.rvs.challenge.mcc.currency.web.property.editor.CustomCalendarEditor;
+import com.rvs.challenge.mcc.currency.web.validator.CurrencyConversionValidator;
+import com.rvs.challenge.mcc.currency.web.validator.UserRegistrationValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +25,9 @@ import java.lang.invoke.MethodHandles;
 import java.util.Calendar;
 import java.util.List;
 
+/**
+ * Currency conversion controller.
+ */
 @Controller
 public class CurrencyController {
 
@@ -34,31 +39,47 @@ public class CurrencyController {
     @Autowired
     CurrencyConversionService currencyConversionService;
 
+    @Autowired
+    private CurrencyConversionValidator currencyConversionValidator;
 
+    /**
+     * Convert the selected exchanges.
+     *
+     * @param conversionForm conversion form data.
+     * @param bindingResult  binding result
+     * @param model          data model
+     * @return Router.
+     */
     @RequestMapping(value = {"/convert"}, method = RequestMethod.POST)
     public String convert(@ModelAttribute("conversionFormData") CurrencyConversionDTO conversionForm, BindingResult bindingResult, Model model) {
 
         try {
-            CurrencyConversionDTO conversionRate = currencyConversionService.convert(conversionForm);
             List<CurrencyConversionDTO> historicalConversions = currencyConversionService.getHistoricalCurrencyConversions(10);
+
+            model.addAttribute("availableCurrencies", AvailableCurrencies.values());
+            model.addAttribute("historicalConversions", historicalConversions);
+
+            currencyConversionValidator.validate(conversionForm, bindingResult);
+
+            if (bindingResult.hasErrors()) {
+                return "main";
+            }
 
             LOGGER.info("convert {} ", ObjectParserUtil.getInstance().toString(conversionForm));
 
+            CurrencyConversionDTO conversionRate = currencyConversionService.convert(conversionForm);
             CurrencyConversionDTO newConversionFormData = new CurrencyConversionDTO();
             newConversionFormData.setTimestamp(Calendar.getInstance());
 
             model.addAttribute("conversionFormData", newConversionFormData);
-            model.addAttribute("availableCurrencies", AvailableCurrencies.values());
             model.addAttribute("conversionRate", conversionRate);
-            model.addAttribute("historicalConversions", historicalConversions);
 
             LOGGER.info("historicalConversions on Controller {} ", ObjectParserUtil.getInstance().toString(historicalConversions));
 
             LOGGER.info("conversionRates on Controller {} ", ObjectParserUtil.getInstance().toString(conversionRate));
 
-        }catch (UsernameNotFoundException e) {
+        } catch (UsernameNotFoundException e) {
             model.addAttribute("message", "Please, log in to convert currencies.");
-
             return "login";
 
         } catch (Exception e) {
@@ -68,6 +89,11 @@ public class CurrencyController {
         return "main";
     }
 
+    /**
+     * Binder for calendar data.
+     *
+     * @param webDataBinder web binder.
+     */
     @InitBinder("conversionFormData")
     public void initBinder(WebDataBinder webDataBinder) {
         webDataBinder.registerCustomEditor(Calendar.class, new CustomCalendarEditor());

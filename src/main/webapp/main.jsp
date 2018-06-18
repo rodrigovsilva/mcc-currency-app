@@ -20,11 +20,11 @@
     <jsp:include page="header.jsp"/>
 
 </head>
-<body>
+<body style="padding-top: 70px; padding-bottom: 70px;>
     <div class="container">
 
         <!-- this is header -->
-        <nav class="navbar navbar-inverse">
+        <nav class="navbar navbar-inverse navbar-fixed-top">
             <div class="container">
                 <div class="navbar-header">
                     <span class="navbar-brand">My Currency Converter</span>
@@ -39,33 +39,38 @@
 
         <form:form method="POST" action="${contextPath}/convert" modelAttribute="conversionFormData">
             <div class="row">
-                <div class="col-xs-3 form-group">
-                    <label>Exchange</label>
-                    <spring:bind path="exchangeFrom">
-                        <form:select path="exchangeFrom" class="form-control">
-                            <form:option value="" label="Select an exchange"/>
-                            <form:options items = "${availableCurrencies}" />
-                        </form:select>
-                    </spring:bind>
-                </div>
-                <div class="col-xs-3 form-group">
-                    <label>Exchange</label>
-                    <spring:bind path="exchangeTo">
-                        <form:select path="exchangeTo" class="form-control">
-                            <form:option value="" label="Select an exchange"/>
-                            <form:options items = "${availableCurrencies}" />
-                        </form:select>
-                    </spring:bind>
-                </div>
-                <div class="col-xs-3 form-group">
-                    <label class="control-label" for="date">Date</label>
-                    <spring:bind path="timestamp">
-                        <form:input class="form-control" id="timestamp" path="timestamp" placeholder="MM/DD/YYY" type="text"/>
-                    </spring:bind>
-                </div>
-                <div class="col-xs-3 form-group">
-                    <label>&nbsp;</label>
-                    <input type="submit" value="Convert" class="btn btn-primary form-control"/>
+                <div class="col-md-12">
+                    <div class="col-md-3 form-group ${status.error ? 'has-error' : ''}">
+                        <label>From</label>
+                        <spring:bind path="exchangeFrom">
+                            <form:select path="exchangeFrom" class="form-control">
+                                <form:option value="" label="Select an exchange"/>
+                                <form:options items = "${availableCurrencies}" />
+                            </form:select>
+                            <form:errors path="exchangeFrom" class="has-error"></form:errors>
+                        </spring:bind>
+                    </div>
+                    <div class="col-md-3 form-group ${status.error ? 'has-error' : ''}">
+                        <label>To</label>
+                        <spring:bind path="exchangeTo">
+                            <form:select path="exchangeTo" class="form-control">
+                                <form:option value="" label="Select an exchange"/>
+                                <form:options items = "${availableCurrencies}" />
+                            </form:select>
+                            <form:errors path="exchangeTo" class="has-error"></form:errors>
+                        </spring:bind>
+                    </div>
+                    <div class="col-md-3 form-group ${status.error ? 'has-error' : ''}">
+                        <label class="control-label" for="date">Date</label>
+                        <spring:bind path="timestamp">
+                            <form:input class="form-control" id="timestamp" path="timestamp" type="text"/>
+                            <form:errors path="timestamp"></form:errors>
+                        </spring:bind>
+                    </div>
+                    <div class="col-md-3 form-group ${status.error ? 'has-error' : ''}">
+                        <label>&nbsp;</label>
+                        <input type="submit" value="Convert" class="btn btn-primary form-control"/>
+                    </div>
                 </div>
             </div>
             <c:if test="${not empty conversionRate}">
@@ -81,19 +86,21 @@
                 <table id="tableClient" class="table table-bordered table-striped col-md-12">
                     <thead>
                         <tr>
-                            <th class="col-md-3">Date</th>
-                            <th class="col-md-3">From</th>
-                            <th class="col-md-3">To</th>
-                            <th class="col-md-3">Rate</th>
+                            <th class="col-md-3">Conversion Date</th>
+                            <th class="col-md-2">From</th>
+                            <th class="col-md-2">To</th>
+                            <th class="col-md-2">Rate</th>
+                            <th class="col-md-3">Rate Date</th>
                         </tr>
                     </thead>
                     <tbody>
                         <c:forEach var="conversion" items="${historicalConversions}">
                             <tr>
                                 <td class="col-md-3"><fmt:formatDate type="both" value="${conversion.createdAt.time}"/></td>
-                                <td class="col-md-3"><c:out value="${conversion.exchangeFrom}"/></td>
-                                <td class="col-md-3"><c:out value="${conversion.exchangeTo}"/></td>
-                                <td class="col-md-3"><fmt:formatNumber value="${conversion.rate}" minFractionDigits="2" maxFractionDigits="2"/></td>
+                                <td class="col-md-2"><c:out value="${conversion.exchangeFrom}"/></td>
+                                <td class="col-md-2"><c:out value="${conversion.exchangeTo}"/></td>
+                                <td class="col-md-2"><fmt:formatNumber value="${conversion.rate}" minFractionDigits="2" maxFractionDigits="2"/></td>
+                                <td class="col-md-3"><fmt:formatDate type="both" value="${conversion.timestamp.time}"/></td>
                             </tr>
                         </c:forEach>
                     </tbody>
@@ -101,20 +108,34 @@
             </div>
         </c:if>
 
-        <footer>
-            <c:if test="${pageContext.request.userPrincipal.name != null}">
-                <form id="logoutForm" method="POST" action="${contextPath}/logout">
-                    <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
-                </form>
-                <span>Welcome ${pageContext.request.userPrincipal.name} | <a onclick="document.forms['logoutForm'].submit()" class="cursor-pointer">Logout</a></span>
-            </c:if>
-        </footer>
+        <nav class="navbar navbar-inverse navbar-fixed-bottom">
+            <div class="container-fluid">
+                <c:if test="${pageContext.request.userPrincipal.name != null}">
+                    <form id="logoutForm" method="POST" action="${contextPath}/logout">
+                        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+                    </form>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="col-md-9 text-primary">
+                                Welcome ${pageContext.request.userPrincipal.name}
+                            </div>
+                            <div class="col-md-3 text-primary text-right">
+                                <a onclick="document.forms['logoutForm'].submit()" class="cursor-pointer">Logout</a>
+                            </div>
+                        </div>
+                    </div>
+                </c:if>
+            </div>
+        </nav>
     </div>
     <!-- /container -->
     <jsp:include page="scripts.jsp"/>
     <script type="text/javascript">
         $(function () {
-            $('#timestamp').datetimepicker();
+            $('#timestamp').datetimepicker({
+                format: 'MM/DD/YYYY',
+                defaultDate: new Date()
+            });
         });
     </script>
 </body>

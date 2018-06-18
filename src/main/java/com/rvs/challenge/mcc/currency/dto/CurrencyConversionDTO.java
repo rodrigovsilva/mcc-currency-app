@@ -1,5 +1,7 @@
 package com.rvs.challenge.mcc.currency.dto;
 
+import org.springframework.format.annotation.DateTimeFormat;
+
 import java.math.BigDecimal;
 import java.util.Calendar;
 
@@ -10,12 +12,14 @@ public class CurrencyConversionDTO {
 
     private String exchangeFrom;
 
+    @DateTimeFormat(pattern="dd/MM/yyyy")
     private Calendar timestamp;
 
     private String exchangeTo;
 
     private BigDecimal rate;
 
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private Calendar createdAt;
 
     public CurrencyConversionDTO() {

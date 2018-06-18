@@ -1,7 +1,6 @@
 package com.rvs.challenge.mcc.currency.web.validator;
 
 import com.rvs.challenge.mcc.currency.dto.UserDTO;
-import com.rvs.challenge.mcc.currency.model.User;
 import com.rvs.challenge.mcc.currency.service.UserService;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,15 +9,18 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
 
+/**
+ * User registration validator.
+ */
 @Component
-public class UserValidator implements Validator {
+public class UserRegistrationValidator implements Validator {
 
     @Autowired
     private UserService userService;
 
     @Override
     public boolean supports(Class<?> aClass) {
-        return User.class.equals(aClass);
+        return UserDTO.class.equals(aClass);
     }
 
     @Override
@@ -27,7 +29,7 @@ public class UserValidator implements Validator {
 
         ValidationUtils.rejectIfEmptyOrWhitespace(errors, "username", "NotEmpty");
 
-        if(!EmailValidator.getInstance().isValid(user.getUsername())){
+        if (!EmailValidator.getInstance().isValid(user.getUsername())) {
             errors.rejectValue("username", "Email.userForm.invalid");
         }
 
