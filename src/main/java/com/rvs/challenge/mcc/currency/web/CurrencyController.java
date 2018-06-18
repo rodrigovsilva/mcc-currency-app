@@ -22,7 +22,9 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
 import java.lang.invoke.MethodHandles;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -69,7 +71,7 @@ public class CurrencyController {
 
             CurrencyConversionDTO conversionRate = currencyConversionService.convert(conversionForm);
             CurrencyConversionDTO newConversionFormData = new CurrencyConversionDTO();
-            newConversionFormData.setTimestamp(Calendar.getInstance());
+            newConversionFormData.setTimestamp(Calendar.getInstance().getTime());
 
             model.addAttribute("conversionFormData", newConversionFormData);
             model.addAttribute("conversionRate", conversionRate);
@@ -96,6 +98,6 @@ public class CurrencyController {
      */
     @InitBinder("conversionFormData")
     public void initBinder(WebDataBinder webDataBinder) {
-        webDataBinder.registerCustomEditor(Calendar.class, new CustomCalendarEditor());
+        webDataBinder.registerCustomEditor(Date.class, new CustomDateEditor(new SimpleDateFormat("dd/MM/yyyy"), true));
     }
 }

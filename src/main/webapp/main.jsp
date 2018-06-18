@@ -100,7 +100,7 @@
                                 <td class="col-md-2"><c:out value="${conversion.exchangeFrom}"/></td>
                                 <td class="col-md-2"><c:out value="${conversion.exchangeTo}"/></td>
                                 <td class="col-md-2"><fmt:formatNumber value="${conversion.rate}" minFractionDigits="2" maxFractionDigits="2"/></td>
-                                <td class="col-md-3"><fmt:formatDate type="both" value="${conversion.timestamp.time}"/></td>
+                                <td class="col-md-3"><fmt:formatDate type="both" value="${conversion.timestamp}"/></td>
                             </tr>
                         </c:forEach>
                     </tbody>
@@ -116,10 +116,10 @@
                     </form>
                     <div class="row">
                         <div class="col-md-12">
-                            <div class="col-md-9 text-primary">
+                            <div class="col-md-9">
                                 Welcome ${pageContext.request.userPrincipal.name}
                             </div>
-                            <div class="col-md-3 text-primary text-right">
+                            <div class="col-md-3 text-right">
                                 <a onclick="document.forms['logoutForm'].submit()" class="cursor-pointer">Logout</a>
                             </div>
                         </div>

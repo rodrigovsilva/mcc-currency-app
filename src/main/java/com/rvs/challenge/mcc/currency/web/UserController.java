@@ -133,7 +133,7 @@ public class UserController {
 
         try {
             CurrencyConversionDTO currencyConversionForm = new CurrencyConversionDTO();
-            currencyConversionForm.setTimestamp(Calendar.getInstance());
+            currencyConversionForm.setTimestamp(Calendar.getInstance().getTime());
 
             model.addAttribute("conversionFormData", currencyConversionForm);
 

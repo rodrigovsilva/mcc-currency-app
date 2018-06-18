@@ -4,6 +4,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import java.math.BigDecimal;
 import java.util.Calendar;
+import java.util.Date;
 
 /**
  * CurrencyConversion Result data transfer object.
@@ -12,8 +13,7 @@ public class CurrencyConversionDTO {
 
     private String exchangeFrom;
 
-    @DateTimeFormat(pattern="dd/MM/yyyy")
-    private Calendar timestamp;
+    private Date timestamp;
 
     private String exchangeTo;
 
@@ -25,7 +25,7 @@ public class CurrencyConversionDTO {
     public CurrencyConversionDTO() {
     }
 
-    public CurrencyConversionDTO(String exchangeFrom, Calendar timestamp, String exchangeTo, BigDecimal rate, Calendar createdAt) {
+    public CurrencyConversionDTO(String exchangeFrom, Date timestamp, String exchangeTo, BigDecimal rate, Calendar createdAt) {
         this.exchangeFrom = exchangeFrom;
         this.timestamp = timestamp;
         this.exchangeTo = exchangeTo;
@@ -41,11 +41,11 @@ public class CurrencyConversionDTO {
         this.exchangeFrom = exchangeFrom;
     }
 
-    public Calendar getTimestamp() {
+    public Date getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(Calendar timestamp) {
+    public void setTimestamp(Date timestamp) {
         this.timestamp = timestamp;
     }
 

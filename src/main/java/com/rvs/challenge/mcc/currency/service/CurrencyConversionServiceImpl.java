@@ -87,7 +87,7 @@ public class CurrencyConversionServiceImpl implements CurrencyConversionService 
                 Calendar timestamp = Calendar.getInstance();
                 timestamp.setTimeInMillis(conversionRates.getTimestamp());
 
-                currencyConversionData.setTimestamp(timestamp);
+                currencyConversionData.setTimestamp(timestamp.getTime());
 
                 // if there is quotes from results
                 if (conversionRates.getQuotes() != null) {
@@ -109,7 +109,7 @@ public class CurrencyConversionServiceImpl implements CurrencyConversionService 
 
                 }
 
-                CurrencyConversion currencyConversionToSave = new CurrencyConversion(currencyConversionData.getExchangeFrom(), currencyConversionData.getExchangeTo(), currencyConversionData.getTimestamp(), currencyConversionData.getRate(), searchedUser.get());
+                CurrencyConversion currencyConversionToSave = new CurrencyConversion(currencyConversionData.getExchangeFrom(), currencyConversionData.getExchangeTo(), timestamp, currencyConversionData.getRate(), searchedUser.get());
 
                 LOGGER.info("convert: currencyConversionToSave {}", ObjectParserUtil.getInstance().toString(currencyConversionToSave.getUser().getUsername()));
 
@@ -141,7 +141,7 @@ public class CurrencyConversionServiceImpl implements CurrencyConversionService 
             return currencyConversions.isPresent()
                     ? currencyConversions.get().getContent()
                     .parallelStream()
-                    .map(c -> new CurrencyConversionDTO(c.getExchangeFrom(), c.getTimestamp(),
+                    .map(c -> new CurrencyConversionDTO(c.getExchangeFrom(), c.getTimestamp().getTime(),
                             c.getExchangeTo(), c.getRate(), c.getCreatedAt())).collect(Collectors.toList())
                     : new ArrayList<>();
         } else {
