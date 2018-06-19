@@ -1,5 +1,8 @@
 
 # my currency converter app
+
+[![Build Status](https://travis-ci.org/rodrigovsilva/mcc-currency-app.svg?branch=master)](https://travis-ci.org/rodrigovsilva/mcc-currency-app)
+
 Challenge App for Zooplus to demonstrates a Currency Converter Application using Spring Boot, JPA, H2, Restful Services and Spring MVC integrating with Git, Travis CI, Docker Hub and Heroku.
 
 Online project https://mcc-currency-app.herokuapp.com/
