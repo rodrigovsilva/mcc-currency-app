@@ -81,7 +81,7 @@
             </div>
             <c:if test="${not empty conversionRate}">
                 <div class="col-md-12">
-                    <h3>1 <c:out value="${conversionRate.exchangeFrom}"/> = <fmt:formatNumber value="${conversionRate.rate}" minFractionDigits="2" maxFractionDigits="2"/><c:out value="${conversionRate.exchangeTo}"/></h3>
+                    <h3>1 <c:out value="${conversionRate.exchangeFrom}"/> = <fmt:formatNumber value="${conversionRate.rate}" minFractionDigits="2" maxFractionDigits="2"/> <c:out value="${conversionRate.exchangeTo}"/></h3>
                 </div>
             </c:if>
         </form:form>
@@ -106,7 +106,7 @@
                                 <td class="col-md-2"><c:out value="${conversion.exchangeFrom}"/></td>
                                 <td class="col-md-2"><c:out value="${conversion.exchangeTo}"/></td>
                                 <td class="col-md-2"><fmt:formatNumber value="${conversion.rate}" minFractionDigits="2" maxFractionDigits="2"/></td>
-                                <td class="col-md-3"><fmt:formatDate type="both" value="${conversion.timestamp}"/></td>
+                                <td class="col-md-3"><fmt:formatDate type="date" value="${conversion.timestamp}"/></td>
                             </tr>
                         </c:forEach>
                     </tbody>

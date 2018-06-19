@@ -7,13 +7,17 @@ import com.rvs.challenge.mcc.currency.model.ExchangeRate;
 import com.rvs.challenge.mcc.currency.model.User;
 import com.rvs.challenge.mcc.currency.repository.CurrencyConversionRepository;
 import com.rvs.challenge.mcc.currency.repository.UserRepository;
+import com.rvs.challenge.mcc.currency.service.currencyconverter.AvailableCurrencies;
 import com.rvs.challenge.mcc.currency.service.currencyconverter.ConversionRates;
 import com.rvs.challenge.mcc.currency.util.Constants;
 import com.rvs.challenge.mcc.currency.util.ObjectParserUtil;
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.DateTimeComparator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.MessageSource;
 import org.springframework.core.env.Environment;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -26,8 +30,11 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
+import sun.plugin2.message.Message;
 
 import java.lang.invoke.MethodHandles;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -42,6 +49,11 @@ public class CurrencyConversionServiceImpl implements CurrencyConversionService 
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
+    /**
+     * Date format to currency api.
+     */
+    private DateFormat dateFormat = new SimpleDateFormat("YYYY-MM-dd");
+
     @Autowired
     private Environment env;
 
@@ -54,28 +66,36 @@ public class CurrencyConversionServiceImpl implements CurrencyConversionService 
     @Autowired
     private SecurityService securityService;
 
+    @Autowired
+    private MessageSource messageSource;
+
     @Override
     public CurrencyConversionDTO convert(CurrencyConversionDTO currencyConversionData) {
 
         Optional<User> searchedUser = userRepository.findByUsername(securityService.findLoggedInUsername());
 
-        if(searchedUser.isPresent()) {
-
-            LOGGER.info("convert: {} {}", currencyConversionData.getTimestamp().toGMTString(), ObjectParserUtil.getInstance().toString(currencyConversionData));
+        if (searchedUser.isPresent()) {
 
             MultiValueMap<String, String> uriVariables = new LinkedMultiValueMap<>();
             uriVariables.add("access_key", env.getProperty(Constants.CURRENCY_API_KEY));
-            uriVariables.add("currencies", currencyConversionData.getExchangeFrom());
             uriVariables.add("source", currencyConversionData.getExchangeFrom());
-            uriVariables.add("timestamp", currencyConversionData.getTimestamp().toString());
             uriVariables.add("format", "1");
 
-            //http://www.mocky.io/v2/5b199e6d3000005a00da17c7
-        /*UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(env.getProperty(Constants.CURRENCY_API_BASE_URL))
-                .queryParams(uriVariables).build();*/
+            // timestamp comparison to define live or historical service
+            int timestampComparison = DateTimeComparator.getDateOnlyInstance().compare(currencyConversionData.getTimestamp(), Calendar.getInstance().getTime());
 
-            UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl("http://www.mocky.io/v2/5b23469c2f00006a00e09483")
-                    .queryParams(uriVariables).build();
+            String currencyApiUri;
+
+            if (timestampComparison >= 0) {
+                currencyApiUri = env.getProperty(Constants.CURRENCY_API_URI_LIVE);
+            } else {
+                currencyApiUri = env.getProperty(Constants.CURRENCY_API_URI_HISTORICAL);
+                uriVariables.add("date", dateFormat.format(currencyConversionData.getTimestamp()));
+            }
+
+            LOGGER.info("uriVariables {} {}", currencyApiUri, ObjectParserUtil.getInstance().toString(uriVariables));
+
+            UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(currencyApiUri).queryParams(uriVariables).build();
 
             RestTemplate restTemplate = new RestTemplate();
             ConversionRates conversionRates = restTemplate.getForObject(uriComponents.toUri(), ConversionRates.class);
@@ -83,12 +103,6 @@ public class CurrencyConversionServiceImpl implements CurrencyConversionService 
             LOGGER.info("convert: conversionRates {}", ObjectParserUtil.getInstance().toString(conversionRates));
 
             if (conversionRates.getSuccess()) {
-
-                // updating rates timestamp
-                Calendar timestamp = Calendar.getInstance();
-                timestamp.setTimeInMillis(conversionRates.getTimestamp());
-
-                currencyConversionData.setTimestamp(timestamp.getTime());
 
                 // if there is quotes from results
                 if (conversionRates.getQuotes() != null) {
@@ -110,6 +124,10 @@ public class CurrencyConversionServiceImpl implements CurrencyConversionService 
 
                 }
 
+                // update timestamp
+                Calendar timestamp =Calendar.getInstance();
+                timestamp.setTime(currencyConversionData.getTimestamp());
+
                 CurrencyConversion currencyConversionToSave = new CurrencyConversion(currencyConversionData.getExchangeFrom(), currencyConversionData.getExchangeTo(), timestamp, currencyConversionData.getRate(), searchedUser.get());
 
                 LOGGER.info("convert: currencyConversionToSave {}", ObjectParserUtil.getInstance().toString(currencyConversionToSave.getUser().getUsername()));
@@ -117,10 +135,10 @@ public class CurrencyConversionServiceImpl implements CurrencyConversionService 
                 currencyConversionRepository.save(currencyConversionToSave);
 
             } else {
-                throw new ConversionRatesException(conversionRates.getError().getInfo());
+                throw new ConversionRatesException(messageSource.getMessage("Exception.currency.api.error", null, Locale.getDefault()));
             }
         } else {
-            throw new UsernameNotFoundException("There is no user logged in or registered on database.");
+            throw new UsernameNotFoundException(messageSource.getMessage("Exception.user.not.exists.error", null, Locale.getDefault()));
         }
 
         return currencyConversionData;
@@ -133,7 +151,7 @@ public class CurrencyConversionServiceImpl implements CurrencyConversionService 
 
         Optional<User> searchedUser = userRepository.findByUsername(username);
 
-        if(searchedUser.isPresent()) {
+        if (searchedUser.isPresent()) {
             Pageable pageable = new PageRequest(0, listSize, Sort.Direction.DESC, "createdAt");
 
             Optional<Page<CurrencyConversion>> currencyConversions = currencyConversionRepository.findAllByUser(searchedUser.get(), pageable);
@@ -149,4 +167,35 @@ public class CurrencyConversionServiceImpl implements CurrencyConversionService 
             return new ArrayList<>();
         }
     }
+
+    @Override
+    @Cacheable("cacheAvailableCurrencies")
+    public Set<String> getAvailableCurrencies() {
+
+        MultiValueMap<String, String> uriVariables = new LinkedMultiValueMap<>();
+        uriVariables.add("access_key", env.getProperty(Constants.CURRENCY_API_KEY));
+
+        UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(env.getProperty(Constants.CURRENCY_API_URI_AVAILABLE_CURRENCIES))
+                .queryParams(uriVariables).build();
+
+        RestTemplate restTemplate = new RestTemplate();
+        AvailableCurrencies availableCurrencies = restTemplate.getForObject(uriComponents.toUri(), AvailableCurrencies.class);
+
+        List<String> currencies = new ArrayList<>();
+
+        if (availableCurrencies != null && availableCurrencies.isSuccess()) {
+            currencies = availableCurrencies.getCurrencies().entrySet().stream()
+                    .map(e -> e.getKey()).sorted(String::compareTo)
+                    .collect(Collectors.toList());
+        } else {
+            throw new ConversionRatesException(messageSource.getMessage("Exception.currency.api.error", null, Locale.getDefault()));
+
+        }
+
+        LOGGER.info("availableCurrencies {}", ObjectParserUtil.getInstance().toString(availableCurrencies));
+
+        return new LinkedHashSet<>(currencies);
+    }
+
+
 }

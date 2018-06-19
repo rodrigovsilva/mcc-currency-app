@@ -1,7 +1,7 @@
 package com.rvs.challenge.mcc.currency.web;
 
-import com.rvs.challenge.mcc.currency.domain.AvailableCurrencies;
 import com.rvs.challenge.mcc.currency.dto.CurrencyConversionDTO;
+import com.rvs.challenge.mcc.currency.exception.ConversionRatesException;
 import com.rvs.challenge.mcc.currency.service.CurrencyConversionService;
 import com.rvs.challenge.mcc.currency.util.ObjectParserUtil;
 import com.rvs.challenge.mcc.currency.web.validator.CurrencyConversionValidator;
@@ -22,10 +22,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.lang.invoke.MethodHandles;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
 /**
  * Currency conversion controller.
@@ -101,12 +98,12 @@ public class CurrencyController {
 
             LOGGER.info("conversionRates on Controller {} ", ObjectParserUtil.getInstance().toString(conversionRate));
 
-        } catch (UsernameNotFoundException e) {
-            model.addAttribute("message", "Please, log in to convert currencies.");
+        } catch (ConversionRatesException | UsernameNotFoundException e) {
+            model.addAttribute("message", e.getMessage());
             return "login";
 
         } catch (Exception e) {
-            model.addAttribute("error", "Something is going wrong. Please, try later.");
+            model.addAttribute("error", messageSource.getMessage("Global.error", null, Locale.getDefault()));
 
         } finally {
             initConversionLists(model);
@@ -122,9 +119,12 @@ public class CurrencyController {
     private void initConversionLists(Model model) {
 
         List<CurrencyConversionDTO> historicalConversions = currencyConversionService.getHistoricalCurrencyConversions(10);
-        model.addAttribute("availableCurrencies", AvailableCurrencies.values());
+        Set<String> availableCurrencies = currencyConversionService.getAvailableCurrencies();
+
+        model.addAttribute("availableCurrencies", availableCurrencies);
         model.addAttribute("historicalConversions", historicalConversions);
 
+        LOGGER.info("availableCurrencies {}", ObjectParserUtil.getInstance().toString(availableCurrencies));
         LOGGER.info("historicalConversions on Controller {} ", ObjectParserUtil.getInstance().toString(historicalConversions));
 
     }

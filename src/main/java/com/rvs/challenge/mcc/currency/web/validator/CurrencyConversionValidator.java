@@ -1,7 +1,7 @@
 package com.rvs.challenge.mcc.currency.web.validator;
 
 import com.rvs.challenge.mcc.currency.dto.CurrencyConversionDTO;
-import com.rvs.challenge.mcc.currency.dto.UserDTO;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -33,6 +33,11 @@ public class CurrencyConversionValidator implements Validator {
 
         ValidationUtils.rejectIfEmptyOrWhitespace(errors, "exchangeTo", "NotEmpty.currencyConversionForm.exchange");
         ValidationUtils.rejectIfEmptyOrWhitespace(errors, "exchangeFrom", "NotEmpty.currencyConversionForm.exchange");
+
+        if (StringUtils.isNotEmpty(conversion.getExchangeTo()) && StringUtils.isNotEmpty(conversion.getExchangeFrom()) &&
+                StringUtils.equalsIgnoreCase(conversion.getExchangeTo(), conversion.getExchangeFrom())) {
+            errors.rejectValue("exchangeFrom", "EqualsNotPermitted.currencyConversionForm.invalid");
+        }
 
         LOGGER.info("validate {}", conversion.getTimestamp());
         if (conversion.getTimestamp() == null) {

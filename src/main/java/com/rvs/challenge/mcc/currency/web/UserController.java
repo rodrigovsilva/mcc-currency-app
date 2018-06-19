@@ -1,12 +1,9 @@
 package com.rvs.challenge.mcc.currency.web;
 
-import com.rvs.challenge.mcc.currency.domain.AvailableCurrencies;
-import com.rvs.challenge.mcc.currency.dto.CurrencyConversionDTO;
 import com.rvs.challenge.mcc.currency.dto.UserDTO;
 import com.rvs.challenge.mcc.currency.service.CurrencyConversionService;
 import com.rvs.challenge.mcc.currency.service.SecurityService;
 import com.rvs.challenge.mcc.currency.service.UserService;
-import com.rvs.challenge.mcc.currency.util.ObjectParserUtil;
 import com.rvs.challenge.mcc.currency.web.validator.UserRegistrationValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.lang.invoke.MethodHandles;
-import java.util.Calendar;
 import java.util.Locale;
 
 /**

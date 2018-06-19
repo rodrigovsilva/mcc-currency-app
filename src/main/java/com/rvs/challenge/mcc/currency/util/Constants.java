@@ -21,6 +21,11 @@ public final class Constants {
     public static final String CURRENCY_API_URI_HISTORICAL = "currency.api.uri.historical";
 
     /**
+     * Currency API Uri available currencies.
+     */
+    public static final String CURRENCY_API_URI_AVAILABLE_CURRENCIES = "currency.api.uri.list";
+
+    /**
      * Cache Expiration Exchange Rates.
      */
     public static final String CACHE_EXPIRATION_EXCHANGE_RATES = "cache.expiration.exchangeRates";
