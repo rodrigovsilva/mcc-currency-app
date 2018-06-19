@@ -61,12 +61,13 @@ public class CurrencyConversionServiceImpl implements CurrencyConversionService 
 
         if(searchedUser.isPresent()) {
 
-            LOGGER.info("convert: {}", ObjectParserUtil.getInstance().toString(currencyConversionData));
+            LOGGER.info("convert: {} {}", currencyConversionData.getTimestamp().toGMTString(), ObjectParserUtil.getInstance().toString(currencyConversionData));
 
             MultiValueMap<String, String> uriVariables = new LinkedMultiValueMap<>();
             uriVariables.add("access_key", env.getProperty(Constants.CURRENCY_API_KEY));
             uriVariables.add("currencies", currencyConversionData.getExchangeFrom());
             uriVariables.add("source", currencyConversionData.getExchangeFrom());
+            uriVariables.add("timestamp", currencyConversionData.getTimestamp().toString());
             uriVariables.add("format", "1");
 
             //http://www.mocky.io/v2/5b199e6d3000005a00da17c7

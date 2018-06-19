@@ -92,7 +92,7 @@ public class UserController {
             model.addAttribute("error", "Something is going wrong. Please, try later.");
 
         }
-        return "redirect:/main";
+        return "redirect:/convert";
     }
 
     /**
@@ -122,29 +122,4 @@ public class UserController {
         return "login";
     }
 
-    /**
-     * Open main screen.
-     *
-     * @param model data model.
-     * @return Router.
-     */
-    @RequestMapping(value = {"/", "/main"}, method = RequestMethod.GET)
-    public String main(Model model) {
-
-        try {
-            CurrencyConversionDTO currencyConversionForm = new CurrencyConversionDTO();
-            currencyConversionForm.setTimestamp(Calendar.getInstance().getTime());
-
-            model.addAttribute("conversionFormData", currencyConversionForm);
-
-            model.addAttribute("availableCurrencies", AvailableCurrencies.values());
-            model.addAttribute("historicalConversions", currencyConversionService.getHistoricalCurrencyConversions(10));
-
-            LOGGER.info("main {} ", ObjectParserUtil.getInstance().toString(AvailableCurrencies.values()));
-        } catch (Exception e) {
-            model.addAttribute("error", messageSource.getMessage("Global.error", null, Locale.getDefault()));
-            return "login";
-        }
-        return "main";
-    }
 }

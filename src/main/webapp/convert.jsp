@@ -64,7 +64,7 @@
                         <label class="control-label" for="date">Date</label>
                         <spring:bind path="timestamp">
                             <form:input class="form-control" id="timestamp" path="timestamp" type="text"/>
-                            <form:errors path="timestamp"></form:errors>
+                            <form:errors path="timestamp" class="has-error"></form:errors>
                         </spring:bind>
                     </div>
                     <div class="col-md-3 form-group ${status.error ? 'has-error' : ''}">
@@ -74,16 +74,16 @@
                 </div>
             </div>
             <c:if test="${not empty conversionRate}">
-                <div class="row col-md-12">
+                <div class="col-md-12">
                     <h3>1 <c:out value="${conversionRate.exchangeFrom}"/> = <fmt:formatNumber value="${conversionRate.rate}" minFractionDigits="2" maxFractionDigits="2"/><c:out value="${conversionRate.exchangeTo}"/></h3>
                 </div>
             </c:if>
         </form:form>
-
+        <br></br>
         <c:if test="${not empty historicalConversions}">
-            <div class="row col-md-12">
+            <div class="col-md-12">
                 <h4>Last 10 conversions</h4>
-                <table id="tableClient" class="table table-bordered table-striped col-md-12">
+                <table id="table-last-conversions" class="table">
                     <thead>
                         <tr>
                             <th class="col-md-3">Conversion Date</th>

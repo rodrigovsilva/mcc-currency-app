@@ -2,30 +2,30 @@ package com.rvs.challenge.mcc.currency.web;
 
 import com.rvs.challenge.mcc.currency.domain.AvailableCurrencies;
 import com.rvs.challenge.mcc.currency.dto.CurrencyConversionDTO;
-import com.rvs.challenge.mcc.currency.dto.UserDTO;
 import com.rvs.challenge.mcc.currency.service.CurrencyConversionService;
 import com.rvs.challenge.mcc.currency.util.ObjectParserUtil;
-import com.rvs.challenge.mcc.currency.web.property.editor.CustomCalendarEditor;
 import com.rvs.challenge.mcc.currency.web.validator.CurrencyConversionValidator;
-import com.rvs.challenge.mcc.currency.web.validator.UserRegistrationValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.context.MessageSource;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.lang.invoke.MethodHandles;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Currency conversion controller.
@@ -38,11 +38,40 @@ public class CurrencyController {
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
+    /**
+     * Date format.
+     */
+    private static final SimpleDateFormat SDF = new SimpleDateFormat("MM/dd/yyyy");
+
     @Autowired
     CurrencyConversionService currencyConversionService;
 
     @Autowired
     private CurrencyConversionValidator currencyConversionValidator;
+
+    @Autowired
+    private MessageSource messageSource;
+
+    /**
+     * Open main screen.
+     *
+     * @param model data model.
+     * @return Router.
+     */
+    @RequestMapping(value = {"/", "/convert"}, method = RequestMethod.GET)
+    public String convert(Model model) {
+
+        try {
+
+            initConversionLists(model);
+            initConversionForm(model);
+
+        } catch (Exception e) {
+            model.addAttribute("error", messageSource.getMessage("Global.error", null, Locale.getDefault()));
+            return "login";
+        }
+        return "convert";
+    }
 
     /**
      * Convert the selected exchanges.
@@ -56,27 +85,19 @@ public class CurrencyController {
     public String convert(@ModelAttribute("conversionFormData") CurrencyConversionDTO conversionForm, BindingResult bindingResult, Model model) {
 
         try {
-            List<CurrencyConversionDTO> historicalConversions = currencyConversionService.getHistoricalCurrencyConversions(10);
-
-            model.addAttribute("availableCurrencies", AvailableCurrencies.values());
-            model.addAttribute("historicalConversions", historicalConversions);
 
             currencyConversionValidator.validate(conversionForm, bindingResult);
 
             if (bindingResult.hasErrors()) {
-                return "main";
+                return "convert";
             }
 
             LOGGER.info("convert {} ", ObjectParserUtil.getInstance().toString(conversionForm));
 
             CurrencyConversionDTO conversionRate = currencyConversionService.convert(conversionForm);
-            CurrencyConversionDTO newConversionFormData = new CurrencyConversionDTO();
-            newConversionFormData.setTimestamp(Calendar.getInstance().getTime());
-
-            model.addAttribute("conversionFormData", newConversionFormData);
             model.addAttribute("conversionRate", conversionRate);
 
-            LOGGER.info("historicalConversions on Controller {} ", ObjectParserUtil.getInstance().toString(historicalConversions));
+            initConversionForm(model);
 
             LOGGER.info("conversionRates on Controller {} ", ObjectParserUtil.getInstance().toString(conversionRate));
 
@@ -87,8 +108,37 @@ public class CurrencyController {
         } catch (Exception e) {
             model.addAttribute("error", "Something is going wrong. Please, try later.");
 
+        } finally {
+            initConversionLists(model);
         }
-        return "main";
+        return "convert";
+    }
+
+    /**
+     * Init conversion data model.
+     *
+     * @param model Data model.
+     */
+    private void initConversionLists(Model model) {
+
+        List<CurrencyConversionDTO> historicalConversions = currencyConversionService.getHistoricalCurrencyConversions(10);
+        model.addAttribute("availableCurrencies", AvailableCurrencies.values());
+        model.addAttribute("historicalConversions", historicalConversions);
+
+        LOGGER.info("historicalConversions on Controller {} ", ObjectParserUtil.getInstance().toString(historicalConversions));
+
+    }
+
+    /**
+     * Init conversion data model.
+     *
+     * @param model Data model.
+     */
+    private void initConversionForm(Model model) {
+        CurrencyConversionDTO currencyConversionForm = new CurrencyConversionDTO();
+        currencyConversionForm.setTimestamp(Calendar.getInstance().getTime());
+        model.addAttribute("conversionFormData", currencyConversionForm);
+
     }
 
     /**
@@ -98,6 +148,6 @@ public class CurrencyController {
      */
     @InitBinder("conversionFormData")
     public void initBinder(WebDataBinder webDataBinder) {
-        webDataBinder.registerCustomEditor(Date.class, new CustomDateEditor(new SimpleDateFormat("dd/MM/yyyy"), true));
+        webDataBinder.registerCustomEditor(Date.class, new CustomDateEditor(SDF, true));
     }
 }
