@@ -107,7 +107,7 @@ public class UserController {
 
             if (logout != null)
                 model.addAttribute("message", messageSource.getMessage("Logout.success", null, Locale.getDefault()));
-        }catch (UsernameNotFoundException e) {
+        } catch (UsernameNotFoundException e) {
             model.addAttribute("message", "Please, log in to convert currencies.");
             return "login";
 

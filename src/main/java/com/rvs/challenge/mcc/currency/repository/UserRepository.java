@@ -12,6 +12,7 @@ public interface UserRepository extends Repository<User, Long> {
 
     /**
      * Find user by username.
+     *
      * @param username Username.
      * @return User found.
      */
@@ -19,6 +20,7 @@ public interface UserRepository extends Repository<User, Long> {
 
     /**
      * Save user.
+     *
      * @param user user to be saved.
      * @return user saved.
      */

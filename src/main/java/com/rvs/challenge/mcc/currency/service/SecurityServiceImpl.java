@@ -18,17 +18,15 @@ import java.lang.invoke.MethodHandles;
  * implementation of security services.
  */
 @Service
-public class SecurityServiceImpl implements SecurityService{
-    @Autowired
-    private AuthenticationManager authenticationManager;
-
-    @Autowired
-    private UserDetailsService userDetailsService;
-
+public class SecurityServiceImpl implements SecurityService {
     /**
      * Logger definition.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+    @Autowired
+    private AuthenticationManager authenticationManager;
+    @Autowired
+    private UserDetailsService userDetailsService;
 
     @Override
     public String findLoggedInUsername() {

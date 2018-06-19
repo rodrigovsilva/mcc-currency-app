@@ -7,12 +7,14 @@ public interface SecurityService {
 
     /**
      * Find logged username.
+     *
      * @return
      */
     String findLoggedInUsername();
 
     /**
      * Auto login method.
+     *
      * @param username username.
      * @param password password.
      */

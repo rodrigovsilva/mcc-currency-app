@@ -13,7 +13,7 @@ public class ExchangeRate {
 
     @Id
     @Basic(optional = false)
-    @Column(unique=true, nullable = false)
+    @Column(unique = true, nullable = false)
     private String exchange;
 
     private BigDecimal rate;

@@ -8,7 +8,7 @@ import java.io.Serializable;
  */
 @Entity
 @Table(name = "PostalAddress")
-public class PostalAddress implements Serializable{
+public class PostalAddress implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

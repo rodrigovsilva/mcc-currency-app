@@ -28,6 +28,7 @@ public class ObjectParserUtil {
 
     /**
      * Convert an object to string.
+     *
      * @param o Object to be converted.
      * @return String as Json.
      */

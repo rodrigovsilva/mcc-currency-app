@@ -15,6 +15,7 @@ public interface CurrencyConversionRepository extends Repository<CurrencyConvers
 
     /**
      * Find all currency conversions by user in pages.
+     *
      * @param user user of conversions.
      * @param page pageable object.
      * @return Pageable conversions list.
@@ -23,6 +24,7 @@ public interface CurrencyConversionRepository extends Repository<CurrencyConvers
 
     /**
      * Save a conversion.
+     *
      * @param currencyConversion conversion to be saved.
      */
     void save(CurrencyConversion currencyConversion);

@@ -10,7 +10,7 @@ import java.util.Set;
 @Table(name = "role")
 public class Role {
 
-     private Long id;
+    private Long id;
 
     private String name;
 

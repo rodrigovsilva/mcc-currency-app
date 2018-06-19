@@ -23,7 +23,7 @@ import java.util.Set;
  * Implementation of a custom user details service.
  */
 @Service
-public class UserDetailsServiceImpl implements UserDetailsService{
+public class UserDetailsServiceImpl implements UserDetailsService {
 
     /**
      * Logger definition.
@@ -39,7 +39,7 @@ public class UserDetailsServiceImpl implements UserDetailsService{
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Optional<User> userModel = userRepository.findByUsername(username);
 
-        if(userModel.isPresent()) {
+        if (userModel.isPresent()) {
             User user = userModel.get();
             Set<GrantedAuthority> grantedAuthorities = new HashSet<>();
             if (user.getRoles() != null) {

@@ -10,13 +10,13 @@ import java.util.Map;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ConversionRates {
- 
+
     private Boolean success;
     private Boolean historical;
     private String date;
     private String source;
     private Long timestamp;
-    
+
     private ConversionRatesError error;
 
     private Map<String, BigDecimal> quotes;

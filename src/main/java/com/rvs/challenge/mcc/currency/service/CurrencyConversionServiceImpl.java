@@ -30,7 +30,6 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
-import sun.plugin2.message.Message;
 
 import java.lang.invoke.MethodHandles;
 import java.text.DateFormat;
@@ -125,7 +124,7 @@ public class CurrencyConversionServiceImpl implements CurrencyConversionService 
                 }
 
                 // update timestamp
-                Calendar timestamp =Calendar.getInstance();
+                Calendar timestamp = Calendar.getInstance();
                 timestamp.setTime(currencyConversionData.getTimestamp());
 
                 CurrencyConversion currencyConversionToSave = new CurrencyConversion(currencyConversionData.getExchangeFrom(), currencyConversionData.getExchangeTo(), timestamp, currencyConversionData.getRate(), searchedUser.get());

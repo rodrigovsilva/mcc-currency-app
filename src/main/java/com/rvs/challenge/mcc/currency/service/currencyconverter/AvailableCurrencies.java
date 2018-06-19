@@ -2,7 +2,6 @@ package com.rvs.challenge.mcc.currency.service.currencyconverter;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import java.math.BigDecimal;
 import java.util.Map;
 
 /**

@@ -15,7 +15,7 @@ public interface CurrencyConversionService {
      *
      * @param conversion CurrencyConversion requested data.
      * @return CurrencyConversion with all available exchange rates.
-    */
+     */
     CurrencyConversionDTO convert(CurrencyConversionDTO conversion);
 
     /**
@@ -23,7 +23,7 @@ public interface CurrencyConversionService {
      *
      * @param listSize Size of historical currency conversions.
      * @return List of currency conversions.
-    */
+     */
     List<CurrencyConversionDTO> getHistoricalCurrencyConversions(int listSize);
 
     /**

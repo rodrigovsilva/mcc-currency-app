@@ -11,12 +11,14 @@ public interface UserService {
 
     /**
      * Save user.
+     *
      * @param user User to be saved.
      */
     void save(UserDTO user);
 
     /**
      * Find user by username
+     *
      * @param username username.
      * @return User found.
      */
@@ -24,6 +26,7 @@ public interface UserService {
 
     /**
      * Find logger user.
+     *
      * @return User logged in.
      */
     Optional<UserDTO> findLoggedUser();

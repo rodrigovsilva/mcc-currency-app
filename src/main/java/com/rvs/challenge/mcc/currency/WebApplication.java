@@ -8,10 +8,6 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
-import org.springframework.web.servlet.LocaleResolver;
-import org.springframework.web.servlet.i18n.SessionLocaleResolver;
-
-import java.util.Locale;
 
 /**
  * Web application.
@@ -20,13 +16,13 @@ import java.util.Locale;
 @EnableJpaAuditing
 public class WebApplication extends SpringBootServletInitializer {
 
+    public static void main(String[] args) throws Exception {
+        SpringApplication.run(WebApplication.class, args);
+    }
+
     @Override
     protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
         return application.sources(WebApplication.class);
-    }
-
-    public static void main(String[] args) throws Exception {
-        SpringApplication.run(WebApplication.class, args);
     }
 
     @Bean
