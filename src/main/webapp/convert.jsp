@@ -30,9 +30,15 @@
                     <span class="navbar-brand">My Currency Converter</span>
                 </div>
                 <div id="navbar" class="collapse navbar-collapse">
-                    <!--<ul class="nav navbar-nav">
-                        <li class="active"><a th:href="@{/}">Home</a></li>
-                    </ul>-->
+                    <c:if test="${pageContext.request.userPrincipal.name != null}">
+                        <ul class="nav navbar-nav navbar-right">
+                            <form id="logoutForm" method="POST" action="${contextPath}/logout">
+                                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+                            </form>
+                            <li><a>Email:&nbsp; ${pageContext.request.userPrincipal.name}</a></li>
+                            <li><a onclick="document.forms['logoutForm'].submit()" class="cursor-pointer">Logout</a></li>
+                        </ul>
+                    </c:if>
                 </div>
             </div>
         </nav>
@@ -107,26 +113,6 @@
                 </table>
             </div>
         </c:if>
-
-        <nav class="navbar navbar-inverse navbar-fixed-bottom">
-            <div class="container-fluid">
-                <c:if test="${pageContext.request.userPrincipal.name != null}">
-                    <form id="logoutForm" method="POST" action="${contextPath}/logout">
-                        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
-                    </form>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="col-md-9">
-                                Welcome ${pageContext.request.userPrincipal.name}
-                            </div>
-                            <div class="col-md-3 text-right">
-                                <a onclick="document.forms['logoutForm'].submit()" class="cursor-pointer">Logout</a>
-                            </div>
-                        </div>
-                    </div>
-                </c:if>
-            </div>
-        </nav>
     </div>
     <!-- /container -->
     <jsp:include page="scripts.jsp"/>
