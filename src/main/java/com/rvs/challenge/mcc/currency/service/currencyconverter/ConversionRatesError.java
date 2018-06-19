@@ -2,6 +2,9 @@ package com.rvs.challenge.mcc.currency.service.currencyconverter;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+/**
+ * CurrencyConversion error model of a currency.
+ */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ConversionRatesError {
 

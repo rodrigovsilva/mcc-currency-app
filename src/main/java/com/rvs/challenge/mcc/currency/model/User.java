@@ -5,6 +5,9 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * User entity model.
+ */
 @Entity
 @Table(name = "user")
 public class User implements Serializable{

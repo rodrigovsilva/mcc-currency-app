@@ -13,6 +13,9 @@ import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 
 import java.util.Locale;
 
+/**
+ * Web application.
+ */
 @SpringBootApplication
 @EnableJpaAuditing
 public class WebApplication extends SpringBootServletInitializer {

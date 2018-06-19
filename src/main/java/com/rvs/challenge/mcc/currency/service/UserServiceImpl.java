@@ -17,6 +17,9 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
+/**
+ * User implementation service.
+ */
 @Service
 public class UserServiceImpl implements UserService {
 

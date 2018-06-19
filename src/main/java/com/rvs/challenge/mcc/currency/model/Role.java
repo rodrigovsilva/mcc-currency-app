@@ -3,11 +3,17 @@ package com.rvs.challenge.mcc.currency.model;
 import javax.persistence.*;
 import java.util.Set;
 
+/**
+ * uUer roles model.
+ */
 @Entity
 @Table(name = "role")
 public class Role {
-    private Long id;
+
+     private Long id;
+
     private String name;
+
     private Set<User> users;
 
     public Role(Long id, String name) {

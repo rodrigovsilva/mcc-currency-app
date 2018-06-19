@@ -16,7 +16,6 @@ import java.util.Calendar;
 @EntityListeners(AuditingEntityListener.class)
 @JsonIgnoreProperties(value = {"createdAt", "updatedAt"},
         allowGetters = true)
-
 @Table(name = "currencyConversion")
 public class CurrencyConversion implements Serializable {
 

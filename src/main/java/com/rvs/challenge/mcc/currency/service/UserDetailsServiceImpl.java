@@ -19,6 +19,9 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
+/**
+ * Implementation of a custom user details service.
+ */
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService{
 

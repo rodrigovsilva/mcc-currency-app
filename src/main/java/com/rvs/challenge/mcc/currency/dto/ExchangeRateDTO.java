@@ -2,6 +2,9 @@ package com.rvs.challenge.mcc.currency.dto;
 
 import java.math.BigDecimal;
 
+/**
+ * Exchange Rates data transfer object.
+ */
 public class ExchangeRateDTO {
 
     private String exchange;

@@ -1,6 +1,5 @@
 package com.rvs.challenge.mcc.currency.service;
 
-import com.rvs.challenge.mcc.currency.util.ObjectParserUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +14,9 @@ import org.springframework.stereotype.Service;
 
 import java.lang.invoke.MethodHandles;
 
+/**
+ * implementation of security services.
+ */
 @Service
 public class SecurityServiceImpl implements SecurityService{
     @Autowired
