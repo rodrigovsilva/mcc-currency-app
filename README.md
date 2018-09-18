@@ -6,6 +6,7 @@
 Challenge App for Zooplus to demonstrates a Currency Converter Application using Spring Boot, JPA, H2, Restful Services and Spring MVC integrating with Git, Travis CI, Docker Hub and Heroku.
 
 Online project https://mcc-currency-app.herokuapp.com/
+Obs: The private currency is not working. You should create another token on  [Currency Layer](https://currencylayer.com/) to work.
 
 ## Architecture Definition
 
@@ -22,7 +23,7 @@ I used the [Classic Way](https://www.petrikainulainen.net/software-development/d
 ## Running in Development
 
 Open a terminal/command:
-1. ``mvn clear instal``
+1. ``mvn clear install``
 2. ``mvn spring-boot:run ``
 
 ## Currency API
