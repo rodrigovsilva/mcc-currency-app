@@ -36,7 +36,7 @@ logging:
 #currency api data
 currency:
   api:
-    key: 1a93b3cd8b49de19721e18f83ebdee32
+    key: XXXXXXXXXXXXXXXXXXXXXX
     uri:
       live: http://apilayer.net/api/live
       historical: http://apilayer.net/api/historical
